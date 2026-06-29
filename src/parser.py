@@ -41,7 +41,6 @@ def _extract_from_api_page(page_items: list[dict]) -> list[dict]:
             price_cents = md.get("price_in_cents")
             price = f"{price_cents / 100:.0f} €" if price_cents else ""
 
-            # URL the seller profile (always valid, unlike post URL)
             profile_url = ad.get("profile_url") or f"{BASE_URL}/profile/{seller_id}"
             msg_url     = ad.get("private_message_url") or f"{BASE_URL}/messages/{seller_id}"
 
@@ -52,8 +51,8 @@ def _extract_from_api_page(page_items: list[dict]) -> list[dict]:
                 "title":        post["subject"],
                 "price":        price,
                 "category":     cat.get("title", ""),
-                "url":          profile_url,   # seller profile — always reachable
-                "published_at": post["created_at"],
+                "url":          profile_url,
+                "published_at": post.get("created_at", ""),
                 "message_url":  msg_url,
             })
         except (KeyError, TypeError):
@@ -74,10 +73,10 @@ async def _fetch_account_listings(
         return []
 
     headers = {
-        "x-auth-token":   auth_token,
-        "accept":         "application/json",
+        "x-auth-token":    auth_token,
+        "accept":          "application/json",
         "accept-language": "de",
-        "user-agent":     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "user-agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     }
 
     log.info(f"[{account_name}] парсинг объявлений...")
@@ -87,37 +86,51 @@ async def _fetch_account_listings(
         async with async_playwright() as pw:
             request_ctx = await pw.request.new_context(extra_http_headers=headers)
             after    = None
-            stop     = False
             page_num = 0
 
-            while not stop:
+            while True:
                 url = f"{_API_POSTS}?categories=&limit=24"
                 if after:
                     url += f"&after={after}"
 
                 response = await request_ctx.get(url)
                 if response.status != 200:
-                    log.warning(f"[{account_name}] API вернул {response.status}")
+                    log.warning(f"[{account_name}] API статус {response.status} — стоп")
                     break
 
                 data       = await response.json()
-                page_items = data.get("page", [])
-                page_info  = data.get("page_info", {})
+                page_items = data.get("page") or []
+                page_info  = data.get("page_info") or {}
                 page_num  += 1
 
                 if not page_items:
+                    log.info(f"[{account_name}] стр.{page_num}: пустая страница")
                     break
 
-                for lst in _extract_from_api_page(page_items):
-                    if _is_within_hours(lst["published_at"], hours):
-                        listings.append(lst)
-                        if progress:
-                            progress.advance(progress.task_ids[0])
-                    else:
-                        stop = True
+                # Extract all items, filter by date — NO early break mid-page
+                # (promoted/boosted listings can appear out of order)
+                page_extracted = _extract_from_api_page(page_items)
+                in_window = [l for l in page_extracted if _is_within_hours(l["published_at"], hours)]
+                listings.extend(in_window)
+
+                log.info(
+                    f"[{account_name}] стр.{page_num}: "
+                    f"{len(page_items)} сырых → {len(page_extracted)} извлечено → "
+                    f"{len(in_window)} в окне {hours}ч"
+                )
+
+                if progress:
+                    for _ in in_window:
+                        progress.advance(progress.task_ids[0])
+
+                # Stop pagination when the oldest item on this page is outside the window
+                # (all remaining pages will be even older)
+                if page_extracted:
+                    oldest = page_extracted[-1]["published_at"]
+                    if not _is_within_hours(oldest, hours):
                         break
 
-                if stop or not page_info.get("has_next_page"):
+                if not page_info.get("has_next_page"):
                     break
 
                 after = page_info.get("end_cursor")
@@ -126,7 +139,7 @@ async def _fetch_account_listings(
 
             await request_ctx.dispose()
 
-    log.info(f"[{account_name}] найдено {len(listings)} объявлений ({page_num} стр.)")
+    log.info(f"[{account_name}] итого {len(listings)} объявлений ({page_num} стр.)")
     return listings
 
 
@@ -151,13 +164,12 @@ async def parse_listings(
     all_listings: list[dict] = []
     for i, result in enumerate(results):
         if isinstance(result, Exception):
-            name = tasks[i][0]
-            log.error(f"[{name}] ошибка парсинга: {result}")
+            log.error(f"[{tasks[i][0]}] ошибка: {result}")
         elif isinstance(result, list):
             all_listings.extend(result)
 
-    seen:   set[str]    = set()
-    unique: list[dict]  = []
+    seen:   set[str]   = set()
+    unique: list[dict] = []
     for lst in all_listings:
         if lst["listing_id"] not in seen:
             seen.add(lst["listing_id"])
