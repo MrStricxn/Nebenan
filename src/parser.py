@@ -6,7 +6,10 @@ from playwright.async_api import async_playwright
 log = logging.getLogger("nebena")
 
 _API_POSTS = "https://api.nebenan.de/api/core/v3/marketplace/posts"
-BASE_URL = "https://nebenan.de"
+BASE_URL   = "https://nebenan.de"
+
+# Fetch all marketplace content types
+_CONTENT_TYPES = "marketplace_sell,marketplace_free,marketplace_lend,marketplace_request"
 
 
 def _get_auth_token(storage_state: dict) -> str | None:
@@ -32,19 +35,29 @@ def _extract_from_api_page(page_items: list[dict]) -> list[dict]:
     for item in page_items:
         try:
             post = item["post"]
-            gid = post["author_details"]["associated_gid"]
+            ad   = post["author_details"]
+            gid  = ad["associated_gid"]
             seller_id = gid.split("/")[-1]
-            price_cents = (post.get("marketplace_details") or {}).get("price_in_cents")
+
+            md    = post.get("marketplace_details") or {}
+            cat   = md.get("category") or {}
+            price_cents = md.get("price_in_cents")
             price = f"{price_cents / 100:.0f} €" if price_cents else ""
+
+            # URL the seller profile (always valid, unlike post URL)
+            profile_url = ad.get("profile_url") or f"{BASE_URL}/profile/{seller_id}"
+            msg_url     = ad.get("private_message_url") or f"{BASE_URL}/messages/{seller_id}"
+
             results.append({
-                "listing_id":  str(post["id"]),
-                "seller_id":   seller_id,
-                "seller_name": post["author_details"]["name"],
-                "title":       post["subject"],
-                "price":       price,
-                "url":         f"{BASE_URL}/marketplace/posts/{post['id']}",
+                "listing_id":   str(post["id"]),
+                "seller_id":    seller_id,
+                "seller_name":  ad["name"],
+                "title":        post["subject"],
+                "price":        price,
+                "category":     cat.get("title", ""),
+                "url":          profile_url,   # seller profile — always reachable
                 "published_at": post["created_at"],
-                "message_url": post["author_details"]["private_message_url"],
+                "message_url":  msg_url,
             })
         except (KeyError, TypeError):
             continue
@@ -64,23 +77,24 @@ async def _fetch_account_listings(
         return []
 
     headers = {
-        "x-auth-token": auth_token,
-        "accept": "application/json",
+        "x-auth-token":   auth_token,
+        "accept":         "application/json",
         "accept-language": "de",
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "user-agent":     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     }
 
-    log.info(f"[{account_name}] парсинг объявлений...")
+    log.info(f"[{account_name}] парсинг объявлений (все категории)...")
+    listings: list[dict] = []
+
     async with semaphore:
         async with async_playwright() as pw:
             request_ctx = await pw.request.new_context(extra_http_headers=headers)
-            listings: list[dict] = []
-            after = None
-            stop = False
+            after    = None
+            stop     = False
             page_num = 0
 
             while not stop:
-                url = f"{_API_POSTS}?categories=&limit=24"
+                url = f"{_API_POSTS}?limit=24&types={_CONTENT_TYPES}"
                 if after:
                     url += f"&after={after}"
 
@@ -89,10 +103,10 @@ async def _fetch_account_listings(
                     log.warning(f"[{account_name}] API вернул {response.status}")
                     break
 
-                data = await response.json()
+                data       = await response.json()
                 page_items = data.get("page", [])
-                page_info = data.get("page_info", {})
-                page_num += 1
+                page_info  = data.get("page_info", {})
+                page_num  += 1
 
                 if not page_items:
                     break
@@ -104,6 +118,7 @@ async def _fetch_account_listings(
                             progress.advance(progress.task_ids[0])
                     else:
                         stop = True
+                        break
 
                 if stop or not page_info.get("has_next_page"):
                     break
@@ -113,8 +128,9 @@ async def _fetch_account_listings(
                     break
 
             await request_ctx.dispose()
-            log.info(f"[{account_name}] найдено {len(listings)} объявлений ({page_num} страниц)")
-            return listings
+
+    log.info(f"[{account_name}] найдено {len(listings)} объявлений ({page_num} стр.)")
+    return listings
 
 
 async def parse_listings(
@@ -136,14 +152,18 @@ async def parse_listings(
         await account_pool.release(name)
 
     all_listings: list[dict] = []
-    for result in results:
-        if isinstance(result, list):
+    for i, result in enumerate(results):
+        if isinstance(result, Exception):
+            name = tasks[i][0]
+            log.error(f"[{name}] ошибка парсинга: {result}")
+        elif isinstance(result, list):
             all_listings.extend(result)
 
-    seen: set[str] = set()
-    unique: list[dict] = []
+    seen:   set[str]    = set()
+    unique: list[dict]  = []
     for lst in all_listings:
         if lst["listing_id"] not in seen:
             seen.add(lst["listing_id"])
             unique.append(lst)
+
     return unique

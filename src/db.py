@@ -18,6 +18,8 @@ async def init_db(db_path: str = "data/nebena.db") -> aiosqlite.Connection:
             listing_id  TEXT PRIMARY KEY,
             seller_id   TEXT,
             title       TEXT,
+            price       TEXT,
+            category    TEXT,
             url         TEXT,
             published_at TEXT,
             parsed_at   TEXT
@@ -39,13 +41,15 @@ async def upsert_listing(conn: aiosqlite.Connection, listing: dict) -> None:
     await conn.execute(
         """
         INSERT OR IGNORE INTO listings
-            (listing_id, seller_id, title, url, published_at, parsed_at)
-        VALUES (?, ?, ?, ?, ?, ?)
+            (listing_id, seller_id, title, price, category, url, published_at, parsed_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             listing["listing_id"],
             listing["seller_id"],
             listing["title"],
+            listing.get("price", ""),
+            listing.get("category", ""),
             listing["url"],
             listing["published_at"],
             now,
