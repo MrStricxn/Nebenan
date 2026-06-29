@@ -7,6 +7,7 @@ log = logging.getLogger("nebena")
 
 BASE_URL = "https://nebenan.de"
 
+_BTN_CONTACT   = "[data-testid='contact-seller-button']"
 _INPUT_MESSAGE = "textarea[data-testid='c-message_form-textfield']"
 _BTN_SEND      = "button[data-testid='c-message_form-submit']"
 
@@ -32,11 +33,28 @@ async def _filter_uncontacted(conn, sellers: list[dict]) -> list[dict]:
 
 async def _send_one(page, seller: dict, template: str) -> bool:
     try:
-        msg_url = seller.get("message_url") or f"{BASE_URL}/messages/{seller['seller_id']}"
-        await page.goto(msg_url, timeout=30000)
-        await page.wait_for_selector(_INPUT_MESSAGE, timeout=12000)
+        listing_url = seller.get("listing_url") or ""
+
+        if listing_url:
+            # Step 1: open the listing page
+            await page.goto(listing_url, timeout=30000)
+            await page.wait_for_load_state("domcontentloaded")
+            # Step 2: click "Verkäufer kontaktieren"
+            await page.wait_for_selector(_BTN_CONTACT, timeout=12000)
+            await page.click(_BTN_CONTACT)
+        else:
+            # Fallback: go directly to messages URL (may not work for new conversations)
+            msg_url = seller.get("message_url") or f"{BASE_URL}/messages/{seller['seller_id']}"
+            await page.goto(msg_url, timeout=30000)
+
+        # Step 3: wait for message textarea (appears after redirect or modal)
+        await page.wait_for_selector(_INPUT_MESSAGE, timeout=15000)
+        # Step 4: fill in the template text
         await page.fill(_INPUT_MESSAGE, template)
+        await page.wait_for_timeout(500)
+        # Step 5: submit
         await page.click(_BTN_SEND, timeout=10000)
+        await page.wait_for_timeout(1000)
         return True
     except Exception as e:
         log.warning(f"  ошибка отправки ({seller.get('seller_name', '?')}): {e}")

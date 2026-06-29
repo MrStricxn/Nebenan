@@ -9,6 +9,7 @@ log = logging.getLogger("nebena")
 BASE_URL = "https://nebenan.de"
 _CONV_API = "https://api.nebenan.de/api/core/v3/conversations"
 
+_BTN_CONTACT   = "[data-testid='contact-seller-button']"
 _INPUT_MESSAGE = "textarea[data-testid='c-message_form-textfield']"
 _BTN_SEND      = "button[data-testid='c-message_form-submit']"
 
@@ -87,12 +88,15 @@ async def _check_replies_via_api(
 
 
 async def _send_phase2_playwright(page, seller: dict, template: str) -> bool:
+    """Phase 2: reply in existing conversation — navigate to messages URL directly."""
     try:
         msg_url = seller.get("message_url") or f"{BASE_URL}/messages/{seller['seller_id']}"
         await page.goto(msg_url, timeout=30000)
-        await page.wait_for_selector(_INPUT_MESSAGE, timeout=10000)
+        await page.wait_for_selector(_INPUT_MESSAGE, timeout=12000)
         await page.fill(_INPUT_MESSAGE, template)
+        await page.wait_for_timeout(500)
         await page.click(_BTN_SEND, timeout=10000)
+        await page.wait_for_timeout(1000)
         return True
     except Exception as e:
         log.warning(f"  ошибка Phase 2 ({seller.get('seller_name', '?')}): {e}")
