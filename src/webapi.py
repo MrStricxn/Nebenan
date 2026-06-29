@@ -5,9 +5,8 @@ import os
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, BackgroundTasks
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.accounts import AccountPool
@@ -39,7 +38,7 @@ class AppState:
 state = AppState()
 
 
-# ─── WebSocket log broadcaster ─────────────────────────────────────────────────
+# ─── WebSocket broadcaster ─────────────────────────────────────────────────────
 
 class WSBroadcaster:
     def __init__(self):
@@ -57,33 +56,37 @@ class WSBroadcaster:
         dead = []
         for client in self.clients:
             try:
-                await client.send_text(json.dumps(message))
+                await client.send_text(json.dumps(message, ensure_ascii=False))
             except Exception:
                 dead.append(client)
         for c in dead:
             self.disconnect(c)
 
+    async def log(self, text: str, level: str = "info"):
+        await self.broadcast({"type": "log", "level": level, "text": text})
+
+    async def task_update(self, running: bool, label: str = ""):
+        await self.broadcast({"type": "task", "running": running, "label": label})
+
 broadcaster = WSBroadcaster()
 
 
+# ─── Logging handler (bridges Python logging → WebSocket) ─────────────────────
+
 class WSHandler(logging.Handler):
+    """Bridge Python logging to WebSocket. Only works when called from async context."""
+    _LEVELS = {"DEBUG": "debug", "INFO": "info", "WARNING": "warning",
+               "ERROR": "error", "CRITICAL": "error"}
+
     def emit(self, record: logging.LogRecord):
-        level_map = {
-            "DEBUG": "debug",
-            "INFO": "info",
-            "WARNING": "warning",
-            "ERROR": "error",
-            "CRITICAL": "error",
-        }
-        msg = {
-            "type": "log",
-            "level": level_map.get(record.levelname, "info"),
-            "text": self.format(record),
-        }
+        msg = {"type": "log", "level": self._LEVELS.get(record.levelname, "info"),
+               "text": self.format(record)}
+        # schedule broadcast without blocking — safe from any context
         try:
             loop = asyncio.get_running_loop()
             loop.create_task(broadcaster.broadcast(msg))
         except RuntimeError:
+            # no running loop (e.g. startup logging) — just ignore
             pass
 
 
@@ -94,12 +97,13 @@ async def lifespan(app: FastAPI):
     os.makedirs("data", exist_ok=True)
     os.makedirs("logs", exist_ok=True)
 
+    # Wire logging → WebSocket
     logger = logging.getLogger("nebena")
     logger.setLevel(logging.DEBUG)
     if not any(isinstance(h, WSHandler) for h in logger.handlers):
-        ws_handler = WSHandler()
-        ws_handler.setFormatter(logging.Formatter("%(message)s"))
-        logger.addHandler(ws_handler)
+        h = WSHandler()
+        h.setFormatter(logging.Formatter("%(message)s"))
+        logger.addHandler(h)
 
     state.pool = AccountPool("cookies")
     await state.pool.load()
@@ -131,7 +135,7 @@ app = FastAPI(lifespan=lifespan, title="NEbena")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
-# ─── WebSocket ─────────────────────────────────────────────────────────────────
+# ─── WebSocket endpoint ────────────────────────────────────────────────────────
 
 @app.websocket("/ws/logs")
 async def ws_logs(websocket: WebSocket):
@@ -143,21 +147,11 @@ async def ws_logs(websocket: WebSocket):
         broadcaster.disconnect(websocket)
 
 
-# ─── API helpers ───────────────────────────────────────────────────────────────
-
-def _log(text: str, level: str = "info"):
-    asyncio.ensure_future(broadcaster.broadcast({"type": "log", "level": level, "text": text}))
-
-def _task_update(running: bool, label: str = ""):
-    asyncio.ensure_future(broadcaster.broadcast({"type": "task", "running": running, "label": label}))
-
-
 # ─── Stats & accounts ──────────────────────────────────────────────────────────
 
 @app.get("/api/stats")
 async def api_stats():
-    stats = await get_stats(state.conn)
-    return stats
+    return await get_stats(state.conn)
 
 
 @app.get("/api/accounts")
@@ -186,127 +180,118 @@ async def api_templates():
     return {"phase1": t1, "phase2": t2}
 
 
-# ─── Parser ────────────────────────────────────────────────────────────────────
+# ─── Background task helpers ───────────────────────────────────────────────────
 
 async def _do_parse():
     state.task_running = True
-    _task_update(True, "Парсинг объявлений...")
-    logger = logging.getLogger("nebena")
+    await broadcaster.task_update(True, "Парсинг объявлений...")
+    await broadcaster.log(f"Запуск парсера — последние {state.settings['hours']}ч, аккаунтов: {state.pool.total}")
     try:
-        logger.info(f"Запуск парсера — последние {state.settings['hours']}ч, аккаунтов: {state.pool.total}")
         listings = await parse_listings(state.pool, hours=state.settings["hours"])
-        new_sellers = []
+        new_sellers = 0
         for lst in listings:
             if await is_seller_new(state.conn, lst["seller_id"]):
-                new_sellers.append(lst)
+                new_sellers += 1
             await upsert_listing(state.conn, lst)
-        logger.info(f"Парсер завершён: {len(listings)} объявлений, {len(new_sellers)} новых продавцов")
+        await broadcaster.log(f"Парсер завершён: {len(listings)} объявлений, {new_sellers} новых продавцов")
         await broadcaster.broadcast({"type": "stats_refresh"})
     except Exception as e:
-        logger.error(f"Ошибка парсера: {e}")
+        await broadcaster.log(f"Ошибка парсера: {e}", "error")
     finally:
         state.task_running = False
-        _task_update(False)
+        await broadcaster.task_update(False)
 
-
-@app.post("/api/parser/run")
-async def api_parser_run(background_tasks: BackgroundTasks):
-    if state.task_running:
-        return JSONResponse({"error": "Задача уже выполняется"}, status_code=409)
-    background_tasks.add_task(_do_parse)
-    return {"ok": True}
-
-
-# ─── Sender ────────────────────────────────────────────────────────────────────
 
 async def _do_send(max_per_run: int = 0):
     state.task_running = True
-    _task_update(True, "Отправка сообщений...")
-    logger = logging.getLogger("nebena")
+    await broadcaster.task_update(True, "Отправка сообщений...")
     try:
         if state.templates.count == 0:
-            logger.warning("Нет шаблонов — добавьте тексты в Shablon.txt")
+            await broadcaster.log("Нет шаблонов — добавьте тексты в Shablon.txt", "warning")
             return
         async with state.conn.execute(
             "SELECT seller_id, seller_name, message_url FROM sellers WHERE message_sent = 0"
         ) as cur:
             rows = await cur.fetchall()
-        sellers = [
-            {"seller_id": r[0], "seller_name": r[1], "message_url": r[2] or ""}
-            for r in rows
-        ]
+        sellers = [{"seller_id": r[0], "seller_name": r[1], "message_url": r[2] or ""} for r in rows]
         if not sellers:
-            logger.info("Нет новых продавцов для отправки — сначала запустите парсер")
+            await broadcaster.log("Нет новых продавцов — сначала запустите парсер", "warning")
             return
-        logger.info(f"В очереди {len(sellers)} продавцов, лимит: {max_per_run or 'без ограничений'}")
+        await broadcaster.log(f"В очереди {len(sellers)} продавцов, лимит: {max_per_run or 'без ограничений'}")
         sent = await send_messages(sellers, state.pool, state.templates, state.conn,
                                    delay=state.settings["delay"], max_per_run=max_per_run)
-        logger.info(f"Рассылка завершена: {sent} сообщений")
+        await broadcaster.log(f"Рассылка завершена: {sent} сообщений")
         await broadcaster.broadcast({"type": "stats_refresh"})
     except Exception as e:
-        logger.error(f"Ошибка отправки: {e}")
+        await broadcaster.log(f"Ошибка отправки: {e}", "error")
     finally:
         state.task_running = False
-        _task_update(False)
+        await broadcaster.task_update(False)
 
-
-@app.post("/api/sender/run")
-async def api_sender_run(background_tasks: BackgroundTasks, body: Optional[dict] = None):
-    if state.task_running:
-        return JSONResponse({"error": "Задача уже выполняется"}, status_code=409)
-    max_per_run = (body or {}).get("max_per_run", 0)
-    background_tasks.add_task(_do_send, max_per_run)
-    return {"ok": True}
-
-
-# ─── Inbox ─────────────────────────────────────────────────────────────────────
 
 async def _do_inbox():
     state.task_running = True
-    _task_update(True, "Проверка входящих...")
-    logger = logging.getLogger("nebena")
+    await broadcaster.task_update(True, "Проверка входящих...")
     try:
         if state.templates2.count == 0:
-            logger.warning("Нет шаблонов Phase 2 — добавьте тексты в Shablon2.txt")
+            await broadcaster.log("Нет шаблонов Phase 2 — добавьте тексты в Shablon2.txt", "warning")
             return
-        logger.info("Проверка входящих сообщений...")
+        await broadcaster.log("Проверка входящих сообщений...")
         sent = await check_and_reply(state.conn, state.pool, state.templates2,
                                      delay=state.settings["delay"])
-        logger.info(f"Проверка входящих завершена: {sent} ответов отправлено")
+        await broadcaster.log(f"Проверка входящих завершена: {sent} ответов отправлено")
         await broadcaster.broadcast({"type": "stats_refresh"})
     except Exception as e:
-        logger.error(f"Ошибка проверки входящих: {e}")
+        await broadcaster.log(f"Ошибка проверки входящих: {e}", "error")
     finally:
         state.task_running = False
-        _task_update(False)
+        await broadcaster.task_update(False)
+
+
+# ─── API endpoints ─────────────────────────────────────────────────────────────
+
+@app.post("/api/parser/run")
+async def api_parser_run():
+    if state.task_running:
+        return JSONResponse({"error": "Задача уже выполняется"}, status_code=409)
+    asyncio.create_task(_do_parse())
+    return {"ok": True}
+
+
+@app.post("/api/sender/run")
+async def api_sender_run(body: Optional[dict] = None):
+    if state.task_running:
+        return JSONResponse({"error": "Задача уже выполняется"}, status_code=409)
+    max_per_run = (body or {}).get("max_per_run", 0)
+    asyncio.create_task(_do_send(max_per_run))
+    return {"ok": True}
 
 
 @app.post("/api/inbox/check")
-async def api_inbox_check(background_tasks: BackgroundTasks):
+async def api_inbox_check():
     if state.task_running:
         return JSONResponse({"error": "Задача уже выполняется"}, status_code=409)
-    background_tasks.add_task(_do_inbox)
+    asyncio.create_task(_do_inbox())
     return {"ok": True}
 
 
 # ─── Scheduler ─────────────────────────────────────────────────────────────────
 
 async def _scheduler_loop():
-    logger = logging.getLogger("nebena")
-    interval = state.settings["scheduler_interval"] * 60
-    per_run = state.settings["scheduler_per_run"]
     run = 0
     while True:
+        interval = state.settings["scheduler_interval"] * 60
+        per_run  = state.settings["scheduler_per_run"]
         run += 1
-        logger.info(f"Планировщик: запуск #{run}")
+        await broadcaster.log(f"Планировщик: запуск #{run}")
         await broadcaster.broadcast({"type": "scheduler", "running": True, "run": run})
         try:
             await _do_parse()
             await _do_send(per_run)
             await _do_inbox()
         except Exception as e:
-            logger.error(f"Планировщик: ошибка — {e}")
-        logger.info(f"Планировщик: следующий запуск через {state.settings['scheduler_interval']} мин")
+            await broadcaster.log(f"Планировщик: ошибка — {e}", "error")
+        await broadcaster.log(f"Планировщик: следующий запуск через {state.settings['scheduler_interval']} мин")
         await asyncio.sleep(interval)
 
 
@@ -316,6 +301,7 @@ async def api_scheduler_start():
         return JSONResponse({"error": "Планировщик уже запущен"}, status_code=409)
     state.scheduler_running = True
     state.scheduler_task = asyncio.create_task(_scheduler_loop())
+    await broadcaster.log(f"Планировщик запущен (каждые {state.settings['scheduler_interval']} мин)")
     return {"ok": True, "running": True}
 
 
@@ -325,7 +311,7 @@ async def api_scheduler_stop():
         state.scheduler_task.cancel()
     state.scheduler_running = False
     state.scheduler_task = None
-    logging.getLogger("nebena").info("Планировщик остановлен")
+    await broadcaster.log("Планировщик остановлен", "warning")
     await broadcaster.broadcast({"type": "scheduler", "running": False})
     return {"ok": True, "running": False}
 

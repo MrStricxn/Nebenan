@@ -25,6 +25,13 @@ async def init_db(db_path: str = "data/nebena.db") -> aiosqlite.Connection:
             parsed_at   TEXT
         );
     """)
+    # Migrate old listings table that may lack price/category columns
+    async with conn.execute("PRAGMA table_info(listings)") as cur:
+        cols = {row[1] for row in await cur.fetchall()}
+    if "price" not in cols:
+        await conn.execute("ALTER TABLE listings ADD COLUMN price TEXT DEFAULT ''")
+    if "category" not in cols:
+        await conn.execute("ALTER TABLE listings ADD COLUMN category TEXT DEFAULT ''")
     await conn.commit()
     return conn
 
