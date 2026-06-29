@@ -7,7 +7,6 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeElapsedColumn
-from rich import print as rprint
 
 console = Console()
 
@@ -73,7 +72,7 @@ def show_settings_menu(current: dict) -> dict:
     return {"hours": int(hours), "delay": float(delay), "max_accounts": current["max_accounts"]}
 
 
-def make_progress(description: str, total: int) -> Progress:
+def make_progress(description: str = "", total: int = 0) -> Progress:
     return Progress(
         SpinnerColumn(),
         TextColumn("[bold blue]{task.description}"),
