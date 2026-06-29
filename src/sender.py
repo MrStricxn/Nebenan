@@ -1,11 +1,20 @@
 import asyncio
+import logging
 from playwright.async_api import async_playwright
 from src.db import mark_seller_contacted
+
+log = logging.getLogger("nebena")
 
 BASE_URL = "https://nebenan.de"
 
 _INPUT_MESSAGE = "textarea[data-testid='c-message_form-textfield']"
 _BTN_SEND      = "button[data-testid='c-message_form-submit']"
+
+_LAUNCH_ARGS = [
+    "--disable-blink-features=AutomationControlled",
+    "--no-sandbox",
+    "--disable-dev-shm-usage",
+]
 
 
 async def _filter_uncontacted(conn, sellers: list[dict]) -> list[dict]:
@@ -25,11 +34,12 @@ async def _send_one(page, seller: dict, template: str) -> bool:
     try:
         msg_url = seller.get("message_url") or f"{BASE_URL}/messages/{seller['seller_id']}"
         await page.goto(msg_url, timeout=30000)
-        await page.wait_for_selector(_INPUT_MESSAGE, timeout=10000)
+        await page.wait_for_selector(_INPUT_MESSAGE, timeout=12000)
         await page.fill(_INPUT_MESSAGE, template)
         await page.click(_BTN_SEND, timeout=10000)
         return True
-    except Exception:
+    except Exception as e:
+        log.warning(f"  ошибка отправки ({seller.get('seller_name', '?')}): {e}")
         return False
 
 
@@ -44,9 +54,12 @@ async def send_messages(
 ) -> int:
     uncontacted = await _filter_uncontacted(conn, sellers)
     if not uncontacted:
+        log.info("Нет новых продавцов для отправки (все уже получили сообщение)")
         return 0
     if max_per_run > 0:
         uncontacted = uncontacted[:max_per_run]
+
+    log.info(f"Готовы к отправке: {len(uncontacted)} продавцов")
 
     sent_count = 0
     semaphore = asyncio.Semaphore(account_pool.total or 1)
@@ -54,13 +67,21 @@ async def send_messages(
     async def _worker(seller: dict):
         nonlocal sent_count
         async with semaphore:
-            name, state = await account_pool.checkout()
+            account_name, state = await account_pool.checkout()
+            log.info(f"[{account_name}] → {seller['seller_name']} ...")
             try:
                 async with async_playwright() as pw:
-                    browser = await pw.chromium.launch(headless=True)
+                    browser = await pw.chromium.launch(
+                        headless=False,
+                        args=_LAUNCH_ARGS,
+                    )
                     ctx = await browser.new_context(
                         storage_state=state,
-                        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                        user_agent=(
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) "
+                            "Chrome/124.0.0.0 Safari/537.36"
+                        ),
                     )
                     page = await ctx.new_page()
                     template = template_loader.get_random()
@@ -68,12 +89,18 @@ async def send_messages(
                     if success:
                         await mark_seller_contacted(conn, seller["seller_id"])
                         sent_count += 1
+                        log.info(f"[{account_name}] ✓ отправлено → {seller['seller_name']}")
+                    else:
+                        log.warning(f"[{account_name}] ✗ не отправлено → {seller['seller_name']}")
                     await browser.close()
+            except Exception as e:
+                log.error(f"[{account_name}] критическая ошибка: {e}")
             finally:
-                await account_pool.release(name)
+                await account_pool.release(account_name)
         if progress:
             progress.advance(progress.task_ids[0])
         await asyncio.sleep(delay)
 
     await asyncio.gather(*[_worker(s) for s in uncontacted])
+    log.info(f"Рассылка завершена: {sent_count}/{len(uncontacted)} отправлено")
     return sent_count

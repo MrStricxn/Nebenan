@@ -232,15 +232,13 @@ async def _do_send(max_per_run: int = 0):
         ) as cur:
             rows = await cur.fetchall()
         sellers = [{"seller_id": r[0], "seller_name": r[1], "message_url": r[2] or ""} for r in rows]
-        if max_per_run > 0:
-            sellers = sellers[:max_per_run]
         if not sellers:
-            logger.info("Нет новых продавцов для отправки.")
+            logger.info("Нет новых продавцов для отправки — сначала запустите парсер")
             return
-        logger.info(f"Отправка сообщений: {len(sellers)} продавцов")
+        logger.info(f"В очереди {len(sellers)} продавцов, лимит: {max_per_run or 'без ограничений'}")
         sent = await send_messages(sellers, state.pool, state.templates, state.conn,
                                    delay=state.settings["delay"], max_per_run=max_per_run)
-        logger.info(f"Отправлено: {sent} сообщений")
+        logger.info(f"Рассылка завершена: {sent} сообщений")
         await broadcaster.broadcast({"type": "stats_refresh"})
     except Exception as e:
         logger.error(f"Ошибка отправки: {e}")

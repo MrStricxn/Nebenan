@@ -1,6 +1,9 @@
 import asyncio
+import logging
 from datetime import datetime, timezone, timedelta
 from playwright.async_api import async_playwright
+
+log = logging.getLogger("nebena")
 
 _API_POSTS = "https://api.nebenan.de/api/core/v3/marketplace/posts"
 BASE_URL = "https://nebenan.de"
@@ -49,6 +52,7 @@ def _extract_from_api_page(page_items: list[dict]) -> list[dict]:
 
 
 async def _fetch_account_listings(
+    account_name: str,
     storage_state: dict,
     hours: int,
     semaphore: asyncio.Semaphore,
@@ -56,6 +60,7 @@ async def _fetch_account_listings(
 ) -> list[dict]:
     auth_token = _get_auth_token(storage_state)
     if not auth_token:
+        log.warning(f"[{account_name}] нет auth-токена — пропуск")
         return []
 
     headers = {
@@ -65,12 +70,14 @@ async def _fetch_account_listings(
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     }
 
+    log.info(f"[{account_name}] парсинг объявлений...")
     async with semaphore:
         async with async_playwright() as pw:
             request_ctx = await pw.request.new_context(extra_http_headers=headers)
             listings: list[dict] = []
             after = None
             stop = False
+            page_num = 0
 
             while not stop:
                 url = f"{_API_POSTS}?categories=&limit=24"
@@ -79,11 +86,13 @@ async def _fetch_account_listings(
 
                 response = await request_ctx.get(url)
                 if response.status != 200:
+                    log.warning(f"[{account_name}] API вернул {response.status}")
                     break
 
                 data = await response.json()
                 page_items = data.get("page", [])
                 page_info = data.get("page_info", {})
+                page_num += 1
 
                 if not page_items:
                     break
@@ -104,6 +113,7 @@ async def _fetch_account_listings(
                     break
 
             await request_ctx.dispose()
+            log.info(f"[{account_name}] найдено {len(listings)} объявлений ({page_num} страниц)")
             return listings
 
 
@@ -117,9 +127,8 @@ async def parse_listings(
     for _ in range(account_pool.total):
         name, state = await account_pool.checkout()
         task = asyncio.create_task(
-            _fetch_account_listings(state, hours, semaphore, progress)
+            _fetch_account_listings(name, state, hours, semaphore, progress)
         )
-        task._account_name = name
         tasks.append((name, task))
 
     results = await asyncio.gather(*[t for _, t in tasks], return_exceptions=True)
