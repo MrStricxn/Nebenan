@@ -7,7 +7,7 @@ from src.parser import _get_auth_token
 log = logging.getLogger("nebena")
 
 BASE_URL = "https://nebenan.de"
-_CONV_API = "https://api.nebenan.de/api/core/v3/conversations"
+_CONV_API = "https://api.nebenan.de/api/v2/private_conversations.json"
 
 _BTN_CONTACT   = "[data-testid='contact-seller-button']"
 _INPUT_MESSAGE = "textarea[data-testid='c-message_form-textfield']"
@@ -20,20 +20,28 @@ _LAUNCH_ARGS = [
 ]
 
 
-async def _fetch_conversations(request_ctx, auth_token: str) -> list[dict]:
-    headers = {"x-auth-token": auth_token, "accept": "application/json"}
-    response = await request_ctx.get(_CONV_API, headers=headers)
-    if response.status != 200:
-        log.warning(f"Conversations API вернул {response.status}")
-        return []
-    try:
-        data = await response.json()
-        if isinstance(data, list):
-            return data
-        return data.get("conversations", data.get("items", []))
-    except Exception as e:
-        log.warning(f"Ошибка разбора conversations: {e}")
-        return []
+async def _fetch_conversations(request_ctx) -> list[dict]:
+    all_convs: list[dict] = []
+    page = 1
+    while True:
+        url = f"{_CONV_API}?page={page}&per_page=20"
+        response = await request_ctx.get(url)
+        if response.status != 200:
+            log.warning(f"Conversations API вернул {response.status}")
+            break
+        try:
+            data = await response.json()
+        except Exception as e:
+            log.warning(f"Ошибка разбора conversations: {e}")
+            break
+        convs = data.get("private_conversations", [])
+        if not convs:
+            break
+        all_convs.extend(convs)
+        if len(convs) < 20:
+            break
+        page += 1
+    return all_convs
 
 
 async def _check_replies_via_api(
@@ -60,25 +68,21 @@ async def _check_replies_via_api(
                 }
             )
 
-            conversations = await _fetch_conversations(request_ctx, auth_token)
+            conversations = await _fetch_conversations(request_ctx)
             await request_ctx.dispose()
 
             for conv in conversations:
                 try:
-                    partner = conv.get("partner") or conv.get("other_user") or {}
-                    partner_id = str(
-                        partner.get("id") or
-                        conv.get("partner_id") or
-                        conv.get("user_id") or ""
-                    )
+                    partner_id = str(conv.get("partner_id", ""))
                     if not partner_id:
                         continue
 
-                    last_msg = conv.get("last_message") or conv.get("latest_message") or {}
-                    sender_id = str(last_msg.get("sender_id") or last_msg.get("author_id") or "")
-                    unread = conv.get("unread_count", 0)
+                    unseen = conv.get("unseen", False)
+                    last_msg = conv.get("last_private_conversation_message") or {}
+                    last_sender = str(last_msg.get("sender_id", ""))
 
-                    if sender_id == partner_id or unread > 0:
+                    # Partner replied = unseen message and partner was the last to write
+                    if unseen and last_sender == partner_id:
                         replied_seller_ids.append(partner_id)
                 except (KeyError, TypeError):
                     continue
