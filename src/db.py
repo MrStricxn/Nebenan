@@ -47,9 +47,13 @@ async def upsert_listing(conn: aiosqlite.Connection, listing: dict) -> None:
     )
     await conn.execute(
         """
-        INSERT OR IGNORE INTO listings
+        INSERT INTO listings
             (listing_id, seller_id, title, price, category, url, published_at, parsed_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(listing_id) DO UPDATE SET
+            price    = excluded.price,
+            category = excluded.category,
+            url      = excluded.url
         """,
         (
             listing["listing_id"],
