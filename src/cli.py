@@ -49,13 +49,15 @@ def show_menu() -> str:
         "[1] Run Parser\n"
         "[2] Run Sender\n"
         "[3] Run Both (Parser → Sender)\n"
-        "[4] Settings\n"
-        "[5] Statistics\n"
-        "[6] Exit",
+        "[4] Check Inbox + Send Replies (Phase 2)\n"
+        "[5] Start Scheduler (auto every 15 min, 2 sellers)\n"
+        "[6] Settings\n"
+        "[7] Statistics\n"
+        "[8] Exit",
         title="[bold yellow]Main Menu[/bold yellow]",
         border_style="yellow",
     ))
-    return Prompt.ask("[bold]Choose option[/bold]", choices=["1","2","3","4","5","6"])
+    return Prompt.ask("[bold]Choose option[/bold]", choices=["1","2","3","4","5","6","7","8"])
 
 
 def show_settings_menu(current: dict) -> dict:
@@ -90,7 +92,9 @@ def show_stats(stats: dict, accounts_total: int, templates_count: int) -> None:
     table.add_column("Metric", style="bold")
     table.add_column("Value", style="cyan")
     table.add_row("Total sellers found", str(stats["total_sellers"]))
-    table.add_row("Sellers messaged", str(stats["messaged"]))
+    table.add_row("Sellers messaged (Phase 1)", str(stats["messaged"]))
+    table.add_row("Sellers replied", str(stats.get("replied", 0)))
+    table.add_row("Phase 2 sent", str(stats.get("phase2_sent", 0)))
     table.add_row("Total listings parsed", str(stats["total_listings"]))
     table.add_row("Accounts loaded", str(accounts_total))
     table.add_row("Templates loaded", str(templates_count))
