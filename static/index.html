@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEbena — Панель управления</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #0B0D15;
+  --surface:     #111520;
+  --surface-hi:  #181C2B;
+  --surface-ho:  #1D2235;
+  --border:      #222640;
+  --border-hi:   #2D3358;
+  --accent:      #E8A020;
+  --accent-dim:  rgba(232,160,32,.12);
+  --blue:        #4B6CF7;
+  --blue-dim:    rgba(75,108,247,.12);
+  --green:       #22C55E;
+  --green-dim:   rgba(34,197,94,.12);
+  --red:         #EF4444;
+  --red-dim:     rgba(239,68,68,.12);
+  --yellow:      #F59E0B;
+  --text-1:      #EFF2F8;
+  --text-2:      #8898B3;
+  --text-3:      #445068;
+  --sidebar-w:   210px;
+  --log-w:       290px;
+  --radius:      10px;
+  --radius-sm:   6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* ── Grid background pulse ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: .35;
+  pointer-events: none;
+  z-index: 0;
+  animation: grid-pulse 8s ease-in-out infinite;
+}
+@keyframes grid-pulse {
+  0%,100% { opacity:.35 }
+  50%      { opacity:.2 }
+}
+
+/* ── Layout ── */
+.layout {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr var(--log-w);
+  grid-template-rows: 100vh;
+  height: 100vh;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-icon {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #000;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-size: 15px; font-weight: 700; letter-spacing: .04em;
+  color: var(--text-1);
+}
+.logo-sub {
+  font-size: 10px; color: var(--text-3); letter-spacing: .06em;
+  text-transform: uppercase; margin-top: 1px;
+}
+
+.nav {
+  padding: 12px 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-group-label {
+  font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-3); padding: 6px 10px 4px; font-weight: 600;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-2);
+  font-size: 13px; font-weight: 500;
+  transition: background .15s, color .15s;
+  user-select: none;
+}
+.nav-item:hover { background: var(--surface-hi); color: var(--text-1); }
+.nav-item.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+.nav-item .icon {
+  width: 18px; height: 18px; flex-shrink: 0;
+  opacity: .7;
+}
+.nav-item.active .icon { opacity: 1; }
+
+.sidebar-accounts {
+  border-top: 1px solid var(--border);
+  padding: 12px 8px;
+}
+.account-list { margin-top: 6px; }
+.account-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 10px; border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--text-2);
+  overflow: hidden;
+}
+.account-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0;
+  box-shadow: 0 0 6px var(--green);
+  animation: dot-pulse 2.5s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%,100% { box-shadow: 0 0 4px var(--green); }
+  50%      { box-shadow: 0 0 10px var(--green); }
+}
+.account-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Task indicator ── */
+.task-bar {
+  border-top: 1px solid var(--border);
+  padding: 10px 14px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px; color: var(--accent);
+}
+.task-bar.visible { display: flex; }
+.task-spinner {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--accent-dim);
+  border-top-color: var(--accent);
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Main content ── */
+.content {
+  overflow-y: auto;
+  padding: 28px;
+}
+
+.page { display: none; animation: fade-in .2s ease; }
+.page.active { display: block; }
+@keyframes fade-in { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform:none; } }
+
+.page-header {
+  margin-bottom: 24px;
+}
+.page-title {
+  font-size: 22px; font-weight: 700; color: var(--text-1);
+  letter-spacing: -.02em;
+}
+.page-sub {
+  font-size: 13px; color: var(--text-2); margin-top: 3px;
+}
+
+/* ── Stat cards ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  transition: border-color .2s;
+}
+.stat-card:hover { border-color: var(--border-hi); }
+.stat-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--text-3); font-weight: 600; margin-bottom: 10px;
+}
+.stat-value {
+  font-size: 28px; font-weight: 700; color: var(--text-1);
+  line-height: 1; letter-spacing: -.02em;
+}
+.stat-value.accent { color: var(--accent); }
+.stat-value.green  { color: var(--green); }
+.stat-value.blue   { color: var(--blue); }
+
+/* ── Action cards (dashboard) ── */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.action-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.action-card:hover {
+  border-color: var(--accent);
+  background: var(--surface-hi);
+}
+.action-card-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+.action-card-title {
+  font-size: 14px; font-weight: 600; color: var(--text-1);
+}
+.action-card-desc {
+  font-size: 12px; color: var(--text-2); line-height: 1.4;
+}
+
+/* ── Section card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+.card-header {
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 600; color: var(--text-1);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-body { padding: 20px; }
+
+/* ── Form elements ── */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.form-row.single { grid-template-columns: 1fr; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label {
+  font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-2); font-weight: 600;
+}
+
+input[type="number"], input[type="text"], select {
+  background: var(--surface-hi);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  color: var(--text-1);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s;
+  width: 100%;
+}
+input[type="number"]:focus,
+input[type="text"]:focus,
+select:focus { border-color: var(--accent); }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; font-weight: 600;
+  transition: opacity .15s, transform .1s;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--accent); color: #000;
+}
+.btn-primary:hover:not(:disabled) { opacity: .9; }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-hi);
+  color: var(--text-1);
+}
+.btn-outline:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+
+.btn-green  { background: var(--green); color: #000; }
+.btn-red    { background: var(--red);   color: #fff; }
+.btn-blue   { background: var(--blue);  color: #fff; }
+.btn-green:hover:not(:disabled) { opacity:.9; }
+.btn-red:hover:not(:disabled)   { opacity:.9; }
+.btn-blue:hover:not(:disabled)  { opacity:.9; }
+
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+/* ── Scheduler status ── */
+.sched-status {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px;
+  background: var(--surface-hi);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.sched-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--text-3);
+  transition: background .3s;
+}
+.sched-dot.on {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+.sched-label { font-size: 13px; font-weight: 500; }
+.sched-info  { font-size: 12px; color: var(--text-2); }
+
+/* ── Log panel ── */
+.log-panel {
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.log-header {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-2); font-weight: 600;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.log-clear {
+  font-size: 10px; color: var(--text-3); cursor: pointer;
+  letter-spacing: .04em;
+  transition: color .15s;
+}
+.log-clear:hover { color: var(--accent); }
+
+.log-entries {
+  flex: 1; overflow-y: auto;
+  padding: 8px 0;
+  scroll-behavior: smooth;
+}
+
+.log-entry {
+  padding: 5px 14px;
+  display: flex; gap: 8px;
+  border-left: 2px solid transparent;
+  animation: log-in .25s ease;
+  font-size: 12px; line-height: 1.4;
+}
+@keyframes log-in {
+  from { opacity:0; transform: translateX(8px); border-left-color: var(--accent); }
+  to   { opacity:1; transform: none; }
+}
+.log-time {
+  color: var(--text-3); flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; padding-top: 1px;
+}
+.log-text { color: var(--text-2); }
+
+.log-entry.info    { }
+.log-entry.warning { border-left-color: var(--yellow)!important; }
+.log-entry.warning .log-text { color: var(--yellow); }
+.log-entry.error   { border-left-color: var(--red)!important; }
+.log-entry.error   .log-text { color: var(--red); }
+.log-entry.success { border-left-color: var(--green)!important; }
+.log-entry.success .log-text { color: var(--green); }
+
+.log-empty {
+  padding: 20px 16px;
+  font-size: 12px; color: var(--text-3); text-align: center;
+}
+
+/* ── WS status dot ── */
+.ws-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-3);
+  transition: background .3s;
+}
+.ws-dot.connected { background: var(--green); }
+
+/* ── Scrollbars ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">N</div>
+      <div>
+        <div class="logo-text">NEbena</div>
+        <div class="logo-sub">nebenan.de</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-group-label">Главное</div>
+      <div class="nav-item active" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+        Панель управления
+      </div>
+      <div class="nav-item" data-page="parser">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/>
+        </svg>
+        Парсер
+      </div>
+      <div class="nav-item" data-page="sender">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7z"/>
+        </svg>
+        Рассылка
+      </div>
+      <div class="nav-item" data-page="inbox">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <path d="m22 6-10 7L2 6"/>
+        </svg>
+        Входящие (Phase 2)
+      </div>
+      <div class="nav-item" data-page="scheduler">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
+        </svg>
+        Планировщик
+      </div>
+
+      <div class="nav-group-label" style="margin-top:8px">Прочее</div>
+      <div class="nav-item" data-page="settings">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Настройки
+      </div>
+    </nav>
+
+    <div class="sidebar-accounts">
+      <div class="nav-group-label">Аккаунты</div>
+      <div class="account-list" id="account-list">
+        <div style="font-size:12px;color:var(--text-3);padding:4px 10px">Загрузка...</div>
+      </div>
+    </div>
+
+    <div class="task-bar" id="task-bar">
+      <div class="task-spinner"></div>
+      <span id="task-label">Выполняется...</span>
+    </div>
+  </aside>
+
+  <!-- ── Main content ── -->
+  <main class="content">
+
+    <!-- Dashboard -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title">Панель управления</div>
+        <div class="page-sub">Общая статистика и быстрые действия</div>
+      </div>
+
+      <div class="stat-grid" id="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Продавцов найдено</div>
+          <div class="stat-value" id="stat-total">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Сообщений отправлено</div>
+          <div class="stat-value accent" id="stat-messaged">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ответили</div>
+          <div class="stat-value green" id="stat-replied">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Phase 2 отправлено</div>
+          <div class="stat-value blue" id="stat-phase2">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Объявлений спарсено</div>
+          <div class="stat-value" id="stat-listings">—</div>
+        </div>
+      </div>
+
+      <div class="action-grid">
+        <div class="action-card" onclick="runParser()">
+          <div class="action-card-icon">🔍</div>
+          <div class="action-card-title">Запустить парсер</div>
+          <div class="action-card-desc">Найти новые объявления за последние N часов</div>
+        </div>
+        <div class="action-card" onclick="runSender()">
+          <div class="action-card-icon">✉️</div>
+          <div class="action-card-title">Отправить сообщения</div>
+          <div class="action-card-desc">Написать новым продавцам (Phase 1)</div>
+        </div>
+        <div class="action-card" onclick="runBoth()">
+          <div class="action-card-icon">⚡</div>
+          <div class="action-card-title">Парсер + Рассылка</div>
+          <div class="action-card-desc">Последовательно: найти и написать</div>
+        </div>
+        <div class="action-card" onclick="navigate('inbox')">
+          <div class="action-card-icon">💬</div>
+          <div class="action-card-title">Проверить входящие</div>
+          <div class="action-card-desc">Ответить на сообщения продавцов (Phase 2)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Parser -->
+    <section class="page" id="page-parser">
+      <div class="page-header">
+        <div class="page-title">Парсер объявлений</div>
+        <div class="page-sub">Сбор новых объявлений с nebenan.de через JSON API</div>
+      </div>
+      <div class="card">
+        <div class="card-header">Параметры парсера</div>
+        <div class="card-body">
+          <div class="form-row single">
+            <div class="field">
+              <label class="label">Объявления за последние N часов</label>
+              <input type="number" id="parser-hours" min="1" max="168" value="24">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="runParser()" id="btn-parse">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/>
+              </svg>
+              Запустить парсер
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sender -->
+    <section class="page" id="page-sender">
+      <div class="page-header">
+        <div class="page-title">Рассылка сообщений</div>
+        <div class="page-sub">Phase 1 — первое приветственное сообщение новым продавцам</div>
+      </div>
+      <div class="card">
+        <div class="card-header">Параметры рассылки</div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field">
+              <label class="label">Задержка между сообщениями (сек)</label>
+              <input type="number" id="sender-delay" min="0.5" max="30" step="0.5" value="2">
+            </div>
+            <div class="field">
+              <label class="label">Макс. сообщений за запуск (0 = все)</label>
+              <input type="number" id="sender-max" min="0" max="100" value="0">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="runSender()" id="btn-send">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7z"/>
+              </svg>
+              Отправить сообщения
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Inbox -->
+    <section class="page" id="page-inbox">
+      <div class="page-header">
+        <div class="page-title">Входящие сообщения</div>
+        <div class="page-sub">Phase 2 — ответ продавцам, которые написали в ответ</div>
+      </div>
+      <div class="card">
+        <div class="card-header">Проверка и ответы</div>
+        <div class="card-body">
+          <p style="color:var(--text-2);font-size:13px;margin-bottom:16px;line-height:1.6">
+            Система проверит диалоги: если продавец ответил на ваше первое сообщение —
+            будет автоматически отправлен Phase 2 ответ из <strong>Shablon2.txt</strong>.
+          </p>
+          <div class="btn-row">
+            <button class="btn btn-blue" onclick="runInbox()" id="btn-inbox">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <path d="m22 6-10 7L2 6"/>
+              </svg>
+              Проверить входящие
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scheduler -->
+    <section class="page" id="page-scheduler">
+      <div class="page-header">
+        <div class="page-title">Планировщик</div>
+        <div class="page-sub">Автоматический запуск каждые N минут</div>
+      </div>
+
+      <div class="sched-status" id="sched-status">
+        <div class="sched-dot" id="sched-dot"></div>
+        <div>
+          <div class="sched-label" id="sched-label">Планировщик остановлен</div>
+          <div class="sched-info" id="sched-info">Настройте параметры и запустите</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Параметры планировщика</div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field">
+              <label class="label">Интервал (минут)</label>
+              <input type="number" id="sched-interval" min="1" max="1440" value="15">
+            </div>
+            <div class="field">
+              <label class="label">Сообщений за запуск</label>
+              <input type="number" id="sched-per-run" min="1" max="50" value="2">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-green" onclick="startScheduler()" id="btn-sched-start">
+              ▶ Запустить
+            </button>
+            <button class="btn btn-red" onclick="stopScheduler()" id="btn-sched-stop" disabled>
+              ■ Остановить
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Что делает планировщик</div>
+        <div class="card-body" style="color:var(--text-2);font-size:13px;line-height:1.8">
+          Каждые N минут:<br>
+          1. Запускает парсер — ищет новые объявления<br>
+          2. Отправляет Phase 1 (до N сообщений за раз)<br>
+          3. Проверяет входящие и отправляет Phase 2 ответы
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section class="page" id="page-settings">
+      <div class="page-header">
+        <div class="page-title">Настройки</div>
+        <div class="page-sub">Общие параметры работы</div>
+      </div>
+      <div class="card">
+        <div class="card-header">Основные параметры</div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field">
+              <label class="label">Объявления за последние N часов</label>
+              <input type="number" id="set-hours" min="1" max="168" value="24">
+            </div>
+            <div class="field">
+              <label class="label">Задержка между сообщениями (сек)</label>
+              <input type="number" id="set-delay" min="0.5" max="60" step="0.5" value="2">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveSettings()">Сохранить настройки</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">Шаблоны сообщений</div>
+        <div class="card-body">
+          <p style="color:var(--text-2);font-size:13px;line-height:1.6;margin-bottom:12px">
+            Шаблоны хранятся в текстовых файлах в корне проекта. Разделитель между вариантами —
+            строка <code style="background:var(--surface-hi);padding:1px 5px;border-radius:3px;font-family:JetBrains Mono">---</code>
+          </p>
+          <div class="form-row">
+            <div class="field">
+              <label class="label">Phase 1 — Shablon.txt</label>
+              <div style="background:var(--surface-hi);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--text-2)">
+                <span id="tpl-phase1-count">—</span> вариантов загружено
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Phase 2 — Shablon2.txt</label>
+              <div style="background:var(--surface-hi);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--text-2)">
+                <span id="tpl-phase2-count">—</span> вариантов загружено
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Log panel ── -->
+  <aside class="log-panel">
+    <div class="log-header">
+      <span>
+        Журнал активности
+        <span class="ws-dot" id="ws-dot" style="display:inline-block;margin-left:6px;vertical-align:middle"></span>
+      </span>
+      <span class="log-clear" onclick="clearLog()">очистить</span>
+    </div>
+    <div class="log-entries" id="log-entries">
+      <div class="log-empty">Ожидание событий...</div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+// ── Navigation ──────────────────────────────────────────────────────────────
+function navigate(page) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+  document.getElementById(`page-${page}`)?.classList.add('active');
+}
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => navigate(el.dataset.page));
+});
+
+// ── Time helpers ─────────────────────────────────────────────────────────────
+function now() {
+  return new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}
+
+// ── Log panel ────────────────────────────────────────────────────────────────
+const logEl = document.getElementById('log-entries');
+
+function addLog(text, level = 'info') {
+  const empty = logEl.querySelector('.log-empty');
+  if (empty) empty.remove();
+
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${level}`;
+  entry.innerHTML = `<span class="log-time">${now()}</span><span class="log-text">${escHtml(text)}</span>`;
+  logEl.appendChild(entry);
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // Keep last 200 entries
+  const entries = logEl.querySelectorAll('.log-entry');
+  if (entries.length > 200) entries[0].remove();
+}
+
+function clearLog() {
+  logEl.innerHTML = '<div class="log-empty">Ожидание событий...</div>';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── WebSocket ────────────────────────────────────────────────────────────────
+const wsDot = document.getElementById('ws-dot');
+let ws, wsReconnect;
+
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws/logs`);
+
+  ws.onopen = () => {
+    wsDot.classList.add('connected');
+    clearTimeout(wsReconnect);
+    addLog('Подключено к серверу', 'success');
+  };
+
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'log') {
+      addLog(msg.text, msg.level);
+    } else if (msg.type === 'task') {
+      setTaskBar(msg.running, msg.label || '');
+    } else if (msg.type === 'stats_refresh') {
+      loadStats();
+    } else if (msg.type === 'scheduler') {
+      updateSchedulerUI(msg.running);
+    }
+  };
+
+  ws.onclose = () => {
+    wsDot.classList.remove('connected');
+    wsReconnect = setTimeout(connectWS, 2500);
+  };
+}
+connectWS();
+
+// ── Task bar ─────────────────────────────────────────────────────────────────
+const taskBar = document.getElementById('task-bar');
+const taskLabel = document.getElementById('task-label');
+
+function setTaskBar(running, label) {
+  if (running) {
+    taskBar.classList.add('visible');
+    taskLabel.textContent = label || 'Выполняется...';
+  } else {
+    taskBar.classList.remove('visible');
+  }
+  // disable/enable all run buttons
+  document.querySelectorAll('.btn[id^="btn-"]').forEach(b => {
+    if (b.id !== 'btn-sched-stop') b.disabled = running;
+  });
+}
+
+// ── Stats ────────────────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const [stats, accs, tpls] = await Promise.all([
+      fetch('/api/stats').then(r => r.json()),
+      fetch('/api/accounts').then(r => r.json()),
+      fetch('/api/templates').then(r => r.json()),
+    ]);
+    document.getElementById('stat-total').textContent    = stats.total_sellers ?? 0;
+    document.getElementById('stat-messaged').textContent = stats.messaged ?? 0;
+    document.getElementById('stat-replied').textContent  = stats.replied ?? 0;
+    document.getElementById('stat-phase2').textContent   = stats.phase2_sent ?? 0;
+    document.getElementById('stat-listings').textContent = stats.total_listings ?? 0;
+
+    // Accounts sidebar
+    const list = document.getElementById('account-list');
+    list.innerHTML = '';
+    if (accs.accounts.length === 0) {
+      list.innerHTML = '<div style="font-size:12px;color:var(--text-3);padding:4px 10px">Нет аккаунтов</div>';
+    } else {
+      accs.accounts.forEach(name => {
+        const b = document.createElement('div');
+        b.className = 'account-badge';
+        b.innerHTML = `<div class="account-dot"></div><div class="account-name" title="${name}">${name}</div>`;
+        list.appendChild(b);
+      });
+    }
+
+    // Templates count
+    document.getElementById('tpl-phase1-count').textContent = tpls.phase1;
+    document.getElementById('tpl-phase2-count').textContent = tpls.phase2;
+  } catch (err) {
+    addLog('Ошибка загрузки статистики', 'error');
+  }
+}
+
+// ── Settings ─────────────────────────────────────────────────────────────────
+async function loadSettings() {
+  try {
+    const s = await fetch('/api/settings').then(r => r.json());
+    document.getElementById('set-hours').value     = s.hours;
+    document.getElementById('set-delay').value     = s.delay;
+    document.getElementById('parser-hours').value  = s.hours;
+    document.getElementById('sender-delay').value  = s.delay;
+    document.getElementById('sched-interval').value = s.scheduler_interval;
+    document.getElementById('sched-per-run').value  = s.scheduler_per_run;
+  } catch {}
+}
+
+async function saveSettings() {
+  const body = {
+    hours:              parseInt(document.getElementById('set-hours').value),
+    delay:              parseFloat(document.getElementById('set-delay').value),
+    scheduler_interval: parseInt(document.getElementById('sched-interval').value),
+    scheduler_per_run:  parseInt(document.getElementById('sched-per-run').value),
+  };
+  try {
+    await fetch('/api/settings', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    addLog('Настройки сохранены', 'success');
+  } catch {
+    addLog('Ошибка сохранения настроек', 'error');
+  }
+}
+
+// ── Actions ──────────────────────────────────────────────────────────────────
+async function apiPost(url, body) {
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    throw new Error(err.error || r.statusText);
+  }
+  return r.json();
+}
+
+async function runParser() {
+  const hours = parseInt(document.getElementById('parser-hours').value) || 24;
+  await apiPost('/api/settings', {hours});
+  try {
+    await apiPost('/api/parser/run');
+    addLog(`Парсер запущен (${hours}ч)`, 'info');
+  } catch (e) {
+    addLog(`Ошибка: ${e.message}`, 'error');
+  }
+}
+
+async function runSender() {
+  const delay  = parseFloat(document.getElementById('sender-delay').value) || 2;
+  const maxRun = parseInt(document.getElementById('sender-max').value) || 0;
+  await apiPost('/api/settings', {delay});
+  try {
+    await apiPost('/api/sender/run', {max_per_run: maxRun});
+    addLog('Рассылка запущена', 'info');
+  } catch (e) {
+    addLog(`Ошибка: ${e.message}`, 'error');
+  }
+}
+
+async function runBoth() {
+  await runParser();
+  // slight delay to let parser kick off before we'd queue sender
+  setTimeout(async () => {
+    addLog('Парсер + рассылка: ожидаем завершения парсера...', 'info');
+  }, 300);
+}
+
+async function runInbox() {
+  try {
+    await apiPost('/api/inbox/check');
+    addLog('Проверка входящих запущена', 'info');
+  } catch (e) {
+    addLog(`Ошибка: ${e.message}`, 'error');
+  }
+}
+
+// ── Scheduler ────────────────────────────────────────────────────────────────
+function updateSchedulerUI(running) {
+  const dot   = document.getElementById('sched-dot');
+  const label = document.getElementById('sched-label');
+  const info  = document.getElementById('sched-info');
+  const btnStart = document.getElementById('btn-sched-start');
+  const btnStop  = document.getElementById('btn-sched-stop');
+  if (running) {
+    dot.classList.add('on');
+    label.textContent = 'Планировщик работает';
+    const interval = document.getElementById('sched-interval').value;
+    const perRun   = document.getElementById('sched-per-run').value;
+    info.textContent = `Каждые ${interval} мин · ${perRun} сообщения за раз`;
+    btnStart.disabled = true;
+    btnStop.disabled  = false;
+  } else {
+    dot.classList.remove('on');
+    label.textContent = 'Планировщик остановлен';
+    info.textContent  = 'Настройте параметры и запустите';
+    btnStart.disabled = false;
+    btnStop.disabled  = true;
+  }
+}
+
+async function startScheduler() {
+  const interval = parseInt(document.getElementById('sched-interval').value) || 15;
+  const perRun   = parseInt(document.getElementById('sched-per-run').value) || 2;
+  await apiPost('/api/settings', {scheduler_interval: interval, scheduler_per_run: perRun});
+  try {
+    await apiPost('/api/scheduler/start');
+    updateSchedulerUI(true);
+    addLog(`Планировщик запущен (${interval} мин, ${perRun} сообщ/раз)`, 'success');
+  } catch (e) {
+    addLog(`Ошибка запуска: ${e.message}`, 'error');
+  }
+}
+
+async function stopScheduler() {
+  try {
+    await apiPost('/api/scheduler/stop');
+    updateSchedulerUI(false);
+    addLog('Планировщик остановлен', 'warning');
+  } catch (e) {
+    addLog(`Ошибка остановки: ${e.message}`, 'error');
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  await loadSettings();
+  await loadStats();
+  // Sync scheduler status
+  try {
+    const s = await fetch('/api/scheduler/status').then(r => r.json());
+    updateSchedulerUI(s.running);
+  } catch {}
+  // Refresh stats every 30s
+  setInterval(loadStats, 30000);
+}
+init();
+</script>
+</body>
+</html>
