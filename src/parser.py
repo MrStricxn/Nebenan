@@ -91,7 +91,11 @@ async def _parse_with_account(
                 soup = BeautifulSoup(html, "html.parser")
                 next_link = soup.select_one("a[rel='next']")
                 if next_link and not stop:
-                    url = BASE_URL + next_link["href"]
+                    href = next_link.get("href", "")
+                    if href:
+                        url = BASE_URL + href
+                    else:
+                        break
                 else:
                     break
             await browser.close()
