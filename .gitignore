@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+data/nebena.db
+logs/*.log
+cookies/*.json
+.env
