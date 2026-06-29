@@ -8,9 +8,6 @@ log = logging.getLogger("nebena")
 _API_POSTS = "https://api.nebenan.de/api/core/v3/marketplace/posts"
 BASE_URL   = "https://nebenan.de"
 
-# Fetch all marketplace content types
-_CONTENT_TYPES = "marketplace_sell,marketplace_free,marketplace_lend,marketplace_request"
-
 
 def _get_auth_token(storage_state: dict) -> str | None:
     for c in storage_state.get("cookies", []):
@@ -83,7 +80,7 @@ async def _fetch_account_listings(
         "user-agent":     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     }
 
-    log.info(f"[{account_name}] парсинг объявлений (все категории)...")
+    log.info(f"[{account_name}] парсинг объявлений...")
     listings: list[dict] = []
 
     async with semaphore:
@@ -94,7 +91,7 @@ async def _fetch_account_listings(
             page_num = 0
 
             while not stop:
-                url = f"{_API_POSTS}?limit=24&types={_CONTENT_TYPES}"
+                url = f"{_API_POSTS}?categories=&limit=24"
                 if after:
                     url += f"&after={after}"
 
