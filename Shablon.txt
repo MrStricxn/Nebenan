@@ -1,5 +1,39 @@
-Hallo! Ich habe Ihr Inserat gesehen und interessiere mich sehr dafür. Ist der Artikel noch verfügbar?
+Hallo! Ich habe Ihr Inserat gerade entdeckt – ist der Artikel noch zu haben?
 ---
-Guten Tag! Ich bin an Ihrem Angebot interessiert. Können wir uns auf einen Preis einigen?
+Hi, guten Tag! Ich bin an dem Angebot interessiert. Ist es noch verfügbar?
 ---
-Hi! Tolles Angebot! Ich würde es gerne kaufen. Wann könnten wir uns treffen?
+Guten Tag! Ich habe Ihre Anzeige gesehen. Ist der Artikel noch da?
+---
+Hallo! Ich würde mich sehr über das Angebot freuen – noch zu haben?
+---
+Hi! Ich habe das Inserat gerade gefunden. Ist es noch aktuell?
+---
+Guten Morgen! Ich interessiere mich für Ihr Angebot. Ist es noch vorhanden?
+---
+Hallo! Das klingt genau nach dem, was ich suche. Ist der Artikel noch verfügbar?
+---
+Hi! Sehr schönes Angebot – ist es noch zu kaufen / zu haben?
+---
+Guten Tag! Ich bin auf Ihre Anzeige gestoßen und sehr interessiert. Noch verfügbar?
+---
+Hallo! Ich hätte großes Interesse daran. Ist der Artikel noch vorhanden?
+---
+Hi, ich habe Ihr Inserat gesehen – wäre das noch zu bekommen?
+---
+Guten Tag! Ich habe das Angebot entdeckt. Ist es noch da?
+---
+Hallo! Ich wäre sehr interessiert. Ist der Artikel noch aktuell?
+---
+Hi! Tolles Angebot – ist es noch verfügbar?
+---
+Guten Abend! Ich bin auf Ihre Anzeige aufmerksam geworden. Noch zu haben?
+---
+Hallo! Ich suche genau sowas. Ist es noch vorhanden?
+---
+Hi! Ich würde das Angebot gerne übernehmen – ist es noch da?
+---
+Guten Tag, ich habe das Inserat gerade gesehen. Ist der Artikel noch verfügbar?
+---
+Hallo! Bin sehr interessiert an Ihrem Angebot. Noch aktuell?
+---
+Hi! Ich habe das Angebot entdeckt und bin interessiert – ist es noch zu haben?
