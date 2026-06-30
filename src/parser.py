@@ -41,7 +41,7 @@ def _extract_from_api_page(page_items: list[dict]) -> list[dict]:
             price_cents = md.get("price_in_cents")
             price = f"{price_cents / 100:.0f} €" if price_cents else ""
 
-            profile_url = ad.get("profile_url") or f"{BASE_URL}/profile/{seller_id}"
+            listing_url = f"{BASE_URL}/feed/{post['id']}"
             msg_url     = ad.get("private_message_url") or f"{BASE_URL}/messages/{seller_id}"
 
             results.append({
@@ -51,7 +51,7 @@ def _extract_from_api_page(page_items: list[dict]) -> list[dict]:
                 "title":        post["subject"],
                 "price":        price,
                 "category":     cat.get("title", ""),
-                "url":          profile_url,
+                "url":          listing_url,
                 "published_at": post.get("created_at", ""),
                 "message_url":  msg_url,
             })

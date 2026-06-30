@@ -210,10 +210,19 @@ async def _do_send(max_per_run: int = 0):
             await broadcaster.log("Нет шаблонов — добавьте тексты в Shablon.txt", "warning")
             return
         async with state.conn.execute(
-            "SELECT seller_id, seller_name, message_url FROM sellers WHERE message_sent = 0"
+            """
+            SELECT s.seller_id, s.seller_name, s.message_url, l.url AS listing_url
+            FROM sellers s
+            LEFT JOIN (
+                SELECT seller_id, url FROM listings
+                GROUP BY seller_id
+            ) l ON s.seller_id = l.seller_id
+            WHERE s.message_sent = 0
+            """
         ) as cur:
             rows = await cur.fetchall()
-        sellers = [{"seller_id": r[0], "seller_name": r[1], "message_url": r[2] or ""} for r in rows]
+        sellers = [{"seller_id": r[0], "seller_name": r[1], "message_url": r[2] or "",
+                    "listing_url": r[3] or ""} for r in rows]
         if not sellers:
             await broadcaster.log("Нет новых продавцов — сначала запустите парсер", "warning")
             return

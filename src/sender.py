@@ -40,22 +40,33 @@ async def _filter_uncontacted(conn, sellers: list[dict]) -> list[dict]:
 
 
 async def _send_one(page, seller: dict, template: str) -> bool:
-    """Navigate to message thread, fill form with JS events, submit."""
+    """Navigate to listing page → click contact button → fill form → submit."""
     try:
-        msg_url = seller.get("message_url") or f"{BASE_URL}/messages/{seller['seller_id']}"
-        await page.goto(msg_url, timeout=30000)
+        listing_url = seller.get("listing_url")
+        msg_url     = seller.get("message_url") or f"{BASE_URL}/messages/{seller['seller_id']}"
 
-        # Wait for the compose textarea
+        if listing_url:
+            await page.goto(listing_url, timeout=30000)
+            contact_btn = page.locator("[data-testid='contact-seller-button']")
+            try:
+                await contact_btn.wait_for(timeout=10000)
+                await contact_btn.click(timeout=5000)
+                # Wait until we land on the messages page (listing image auto-attaches)
+                await page.wait_for_url("**/messages/**", timeout=15000)
+            except Exception:
+                # Button not found or timeout — fall back to direct messages URL
+                await page.goto(msg_url, timeout=30000)
+        else:
+            await page.goto(msg_url, timeout=30000)
+
+        # Fill the compose textarea
         textarea = page.locator(_INPUT_MESSAGE)
         await textarea.wait_for(timeout=15000)
-
-        # Click to focus, then set value + trigger JS events that activate the submit button
         await textarea.click()
         await textarea.fill(template)
         await textarea.evaluate(_TRIGGER_EVENTS)
         await page.wait_for_timeout(600)
 
-        # Click submit — button should now be active
         btn = page.locator(_BTN_SEND)
         await btn.click(timeout=8000)
         await page.wait_for_timeout(1200)
