@@ -621,6 +621,35 @@ async def api_chat_conversations(account: str, page: int = 1):
     return {"conversations": convs}
 
 
+@app.get("/api/chat/conversations/all")
+async def api_chat_conversations_all():
+    """Fetch conversations from ALL accounts, merged and sorted by last message."""
+    accounts = state.pool._accounts if state.pool else {}
+
+    async def _fetch(name: str, storage: dict) -> list[dict]:
+        token = get_token(storage)
+        if not token:
+            return []
+        try:
+            convs = await fetch_conversations(token, per_page=30)
+            for c in convs:
+                c["_account"] = name
+            return convs
+        except Exception as e:
+            log.debug(f"conversations/all [{name}]: {e}")
+            return []
+
+    results = await asyncio.gather(*[_fetch(n, s) for n, s in accounts.items()])
+    merged  = [c for r in results for c in r]
+
+    def _sort_key(c: dict) -> str:
+        lm = c.get("last_private_conversation_message") or {}
+        return lm.get("created_at") or ""
+
+    merged.sort(key=_sort_key, reverse=True)
+    return {"conversations": merged}
+
+
 @app.get("/api/chat/messages")
 async def api_chat_messages(account: str, partner_id: int, per_page: int = 50):
     token = _account_token(account)

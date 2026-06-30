@@ -526,6 +526,22 @@ input, select, textarea { font-family: inherit; outline: none }
 .btn-chat-send:active  { transform: scale(.95) }
 .btn-chat-send:disabled { opacity: .4; cursor: not-allowed }
 
+/* ── Unified inbox account badge ── */
+.conv-acct-badge {
+  font-size: 10px; font-weight: 700; padding: 1px 6px;
+  background: var(--am10); color: var(--am); border-radius: 4px;
+  margin-left: 5px; vertical-align: middle; flex-shrink: 0;
+}
+
+/* ── Auto-translate toggle ── */
+.autotl-btn {
+  background: none; border: 1px solid var(--bd); color: var(--t2);
+  padding: 4px 10px; border-radius: 6px; font-size: 11.5px; cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s; white-space: nowrap;
+}
+.autotl-btn:hover  { color: var(--t1); border-color: var(--bd2) }
+.autotl-btn.on     { color: var(--gn); border-color: var(--gn); background: var(--gn10) }
+
 /* ── Quick-reply strip ── */
 .qr-strip {
   display: flex; gap: 6px; padding: 6px 0 2px; overflow-x: auto; flex-shrink: 0;
@@ -743,7 +759,9 @@ input, select, textarea { font-family: inherit; outline: none }
       <div class="chat-sidebar">
         <div class="chat-acct-bar">
           <label>Акк:</label>
-          <select id="chat-acct-select" onchange="onChatAccountChange()"></select>
+          <select id="chat-acct-select" onchange="onChatAccountChange()">
+            <option value="__all__">🌐 Все аккаунты</option>
+          </select>
           <button class="chat-refresh-btn" onclick="loadConversations()" title="Обновить">↺</button>
         </div>
         <div class="chat-search">
@@ -767,6 +785,7 @@ input, select, textarea { font-family: inherit; outline: none }
               <div class="chat-header-name" id="chat-header-name"></div>
               <div class="chat-header-sub"  id="chat-header-sub"></div>
             </div>
+            <button class="autotl-btn" id="autotl-btn" onclick="toggleAutoTranslate()" title="Авто-перевод входящих">🌐 Авто</button>
             <button class="chat-hdr-reload" onclick="loadMessages(_chatPartnerId)" title="Обновить">↺</button>
           </div>
           <div class="chat-messages" id="chat-messages"></div>
@@ -1329,44 +1348,56 @@ function floatVal(id)     { return parseFloat(document.getElementById(id)?.value
 // ══════════════════════════════════════════
 // ── CHAT ──
 // ══════════════════════════════════════════
-let _chatAccount   = '';
-let _chatPartnerId = null;
-let _chatMyId      = null;
-let _allConvs      = [];
-let _photoFiles    = [];
+let _chatAccount       = '__all__';  // selected in dropdown
+let _activeChatAccount = '';          // account of currently open conversation
+let _chatPartnerId     = null;
+let _chatMyId          = null;
+let _allConvs          = [];
+let _photoFiles        = [];
+let _autoTranslate     = localStorage.getItem('autotl') === '1';
 
 async function initChat() {
   renderQuickReplies();
+  syncAutoTranslateBtn();
   const convList = document.getElementById('conv-list');
   if (!convList._chatWired) {
     convList._chatWired = true;
     convList.addEventListener('click', e => {
       const item = e.target.closest('.conv-item[data-pid]');
       if (!item) return;
-      openConv(parseInt(item.dataset.pid), item.dataset.name || '', item.dataset.avatar || '');
+      const acct = item.dataset.account || _chatAccount;
+      openConv(parseInt(item.dataset.pid), item.dataset.name || '', item.dataset.avatar || '', acct);
     });
   }
   try {
     const r   = await api('/api/chat/accounts');
     const sel = document.getElementById('chat-acct-select');
-    sel.innerHTML = r.accounts.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join('');
-    _chatAccount  = r.accounts[0] || '';
-    if (_chatAccount) await loadConversations();
+    // "Все аккаунты" is already first (from HTML), then real accounts
+    sel.innerHTML = '<option value="__all__">🌐 Все аккаунты</option>' +
+      r.accounts.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join('');
+    sel.value    = '__all__';
+    _chatAccount = '__all__';
+    await loadConversations();
   } catch(e) { console.error('initChat:', e) }
 }
 
 async function onChatAccountChange() {
-  _chatAccount   = document.getElementById('chat-acct-select').value;
-  _chatPartnerId = null;
+  _chatAccount       = document.getElementById('chat-acct-select').value;
+  _activeChatAccount = '';
+  _chatPartnerId     = null;
   showNoConv();
   await loadConversations();
 }
 
 async function loadConversations() {
-  if (!_chatAccount) return;
   document.getElementById('conv-list').innerHTML = skeletonConvList();
   try {
-    const r   = await api(`/api/chat/conversations?account=${encodeURIComponent(_chatAccount)}`);
+    let r;
+    if (_chatAccount === '__all__') {
+      r = await api('/api/chat/conversations/all');
+    } else {
+      r = await api(`/api/chat/conversations?account=${encodeURIComponent(_chatAccount)}`);
+    }
     _allConvs = r.conversations || [];
     renderConvList(_allConvs);
     updateNavBadge();
@@ -1501,21 +1532,25 @@ function convItemHtml(c, showMatch) {
   const u        = c._linkedUser || {};
   const name     = convName(c);
   const avatar   = u.photo_thumb_url || u.photo_url || '';
+  const acct     = c._account || '';
   const lastMsg  = c.last_private_conversation_message || {};
   const lastTxt  = lastMsg.body ? lastMsg.body.slice(0, 52) + (lastMsg.body.length > 52 ? '…' : '') : '';
   const time     = lastMsg.created_at ? fmtTime(lastMsg.created_at) : '';
   const unread   = c.unseen ? '<span class="conv-unread">!</span>' : '';
-  const active   = pid == _chatPartnerId ? ' active' : '';
+  const active   = pid == _chatPartnerId && (acct === _activeChatAccount || !acct) ? ' active' : '';
   const avHtml   = avatar
     ? `<div class="conv-avatar"><img src="${esc(avatar)}" alt=""></div>`
     : `<div class="conv-avatar">👤</div>`;
   const matchHtml = showMatch && c._match
     ? `<div class="conv-match">${c._match.icon} ${esc(c._match.text.slice(0, 55))}</div>` : '';
   const dimNote   = c._notLoaded ? '<span style="font-size:10px;color:var(--t3)"> · нет чата</span>' : '';
-  return `<div class="conv-item${active}" data-pid="${pid}" data-name="${esc(name)}" data-avatar="${esc(avatar)}">
+  // Show account badge only in unified "all" mode
+  const acctBadge = acct && _chatAccount === '__all__'
+    ? `<span class="conv-acct-badge">${esc(acct)}</span>` : '';
+  return `<div class="conv-item${active}" data-pid="${pid}" data-name="${esc(name)}" data-avatar="${esc(avatar)}" data-account="${esc(acct)}">
     ${avHtml}
     <div class="conv-info">
-      <div class="conv-name">${esc(name)}${dimNote}</div>
+      <div class="conv-name">${esc(name)}${dimNote}${acctBadge}</div>
       <div class="conv-last">${esc(lastTxt)}</div>
       ${matchHtml}
     </div>
@@ -1527,12 +1562,13 @@ function convItemHtml(c, showMatch) {
 }
 
 // Open conversation
-async function openConv(partnerId, name, avatarUrl) {
-  _chatPartnerId = partnerId;
+async function openConv(partnerId, name, avatarUrl, accountOverride) {
+  _chatPartnerId     = partnerId;
+  _activeChatAccount = accountOverride || _chatAccount;
   document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
-  document.querySelector(`.conv-item[data-pid="${partnerId}"]`)?.classList.add('active');
+  document.querySelector(`.conv-item[data-pid="${partnerId}"][data-account="${_activeChatAccount}"],` +
+    `.conv-item[data-pid="${partnerId}"]:not([data-account])`)?.classList.add('active');
   showThread(name, avatarUrl, partnerId);
-  // Load listing info from DB
   loadListingInfo(partnerId);
   await loadMessages(partnerId);
 }
@@ -1570,10 +1606,11 @@ function showNoConv() {
 
 async function loadMessages(partnerId) {
   if (!partnerId) return;
-  const box = document.getElementById('chat-messages');
+  const box  = document.getElementById('chat-messages');
+  const acct = _activeChatAccount || _chatAccount;
   box.innerHTML = skeletonMessages();
   try {
-    const r     = await api(`/api/chat/messages?account=${encodeURIComponent(_chatAccount)}&partner_id=${partnerId}`);
+    const r     = await api(`/api/chat/messages?account=${encodeURIComponent(acct)}&partner_id=${partnerId}`);
     _chatMyId   = r.my_id;
     const msgs  = r.private_conversation_messages || [];
     const users = {};
@@ -1606,9 +1643,21 @@ async function loadMessages(partnerId) {
     }
     box.innerHTML = html;
     box.scrollTop = box.scrollHeight;
+    if (_autoTranslate) autoTranslateIncoming(box);
   } catch(e) {
     box.innerHTML = '<div class="chat-empty" style="color:var(--rd)">Ошибка загрузки</div>';
     console.error('loadMessages:', e);
+  }
+}
+
+async function autoTranslateIncoming(box) {
+  // Translate last 8 incoming messages (to avoid API quota abuse)
+  const btns = [...(box || document.getElementById('chat-messages'))
+    .querySelectorAll('.msg-row:not(.me) .msg-translate-btn')].slice(-8);
+  for (const btn of btns) {
+    if (btn.disabled || btn.textContent.startsWith('✕')) continue;
+    await translateMsg(btn);
+    await new Promise(r => setTimeout(r, 250));
   }
 }
 
@@ -1672,6 +1721,20 @@ function renderMessage(m, users) {
   </div>`;
 }
 
+function toggleAutoTranslate() {
+  _autoTranslate = !_autoTranslate;
+  localStorage.setItem('autotl', _autoTranslate ? '1' : '0');
+  syncAutoTranslateBtn();
+  if (_autoTranslate && _chatPartnerId) autoTranslateIncoming();
+  toast(_autoTranslate ? 'Авто-перевод включён' : 'Авто-перевод выключен', 'ok');
+}
+function syncAutoTranslateBtn() {
+  const btn = document.getElementById('autotl-btn');
+  if (!btn) return;
+  btn.classList.toggle('on', _autoTranslate);
+  btn.title = _autoTranslate ? 'Авто-перевод ВКЛ (нажать чтобы выкл)' : 'Авто-перевод ВЫКЛ';
+}
+
 async function translateMsg(btn) {
   const text   = btn.dataset.text;
   const bubble = btn.closest('.msg-row').querySelector('.msg-bubble');
@@ -1711,7 +1774,8 @@ function renderPhotoPreviews() {
 function removePhoto(i) { _photoFiles.splice(i, 1); renderPhotoPreviews() }
 
 async function sendChatMessage() {
-  if (!_chatPartnerId || !_chatAccount) return;
+  const acct = _activeChatAccount || _chatAccount;
+  if (!_chatPartnerId || !acct) return;
   const ta   = document.getElementById('compose-text');
   const text = ta.value.trim();
   if (!text && !_photoFiles.length) return;
@@ -1722,13 +1786,13 @@ async function sendChatMessage() {
     let r;
     if (hasPhotos) {
       const fd = new FormData();
-      fd.append('account', _chatAccount);
+      fd.append('account', acct);
       fd.append('partner_id', String(_chatPartnerId));
       fd.append('text', text);
       for (const f of _photoFiles) fd.append('photos', f);
       r = await (await fetch('/api/chat/send-photo', { method: 'POST', body: fd })).json();
     } else {
-      r = await apiPost('/api/chat/send', { account: _chatAccount, partner_id: _chatPartnerId, text });
+      r = await apiPost('/api/chat/send', { account: acct, partner_id: _chatPartnerId, text });
     }
     if (r.ok) {
       ta.value = ''; ta.style.height = 'auto';
