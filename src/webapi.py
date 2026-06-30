@@ -16,7 +16,7 @@ from src.db import init_db, upsert_listing, is_seller_new, get_stats
 from src.parser import parse_listings
 from src.sender import send_messages
 from src.inbox import check_and_reply
-from src.chat import get_token, fetch_conversations, fetch_messages, fetch_profile, send_reply
+from src.chat import get_token, fetch_conversations, fetch_messages, fetch_profile, send_message
 
 
 # ─── State ────────────────────────────────────────────────────────────────────
@@ -595,10 +595,10 @@ async def api_chat_send(body: dict):
     text       = body.get("text", "").strip()
     if not account or not partner_id or not text:
         return JSONResponse({"error": "account, partner_id и text обязательны"}, status_code=400)
-    storage = _account_state(account)
-    if not storage:
+    token = _account_token(account)
+    if not token:
         return JSONResponse({"error": "Аккаунт не найден"}, status_code=404)
-    ok = await send_reply(storage, int(partner_id), text)
+    ok = await send_message(token, int(partner_id), text)
     return {"ok": ok}
 
 

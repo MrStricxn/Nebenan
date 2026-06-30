@@ -998,6 +998,16 @@ let _allConvs      = [];
 let _photoFiles    = [];
 
 async function initChat() {
+  // Wire up conv-list click once
+  const convList = document.getElementById('conv-list');
+  if (!convList._chatWired) {
+    convList._chatWired = true;
+    convList.addEventListener('click', e => {
+      const item = e.target.closest('.conv-item[data-pid]');
+      if (!item) return;
+      openConv(parseInt(item.dataset.pid), item.dataset.name || '', item.dataset.avatar || '');
+    });
+  }
   try {
     const r = await api('/api/chat/accounts');
     const sel = document.getElementById('chat-acct-select');
@@ -1055,7 +1065,7 @@ function renderConvList(convs) {
     const time = lastMsg.created_at ? fmtTime(lastMsg.created_at) : '';
     const unread = c.unseen ? '<span class="conv-unread">!</span>' : '';
     const active = pid == _chatPartnerId ? ' active' : '';
-    return `<div class="conv-item${active}" onclick="openConv(${pid}, ${JSON.stringify(name)}, ${JSON.stringify(avatar||'')})">
+    return `<div class="conv-item${active}" data-pid="${pid}" data-name="${esc(name)}" data-avatar="${esc(avatar||'')}">
       ${avatarHtml}
       <div class="conv-info">
         <div class="conv-name">${esc(name)}</div>
@@ -1072,7 +1082,7 @@ function renderConvList(convs) {
 async function openConv(partnerId, name, avatarUrl) {
   _chatPartnerId = partnerId;
   document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
-  document.querySelector(`.conv-item[onclick*="openConv(${partnerId},"]`)?.classList.add('active');
+  document.querySelector(`.conv-item[data-pid="${partnerId}"]`)?.classList.add('active');
 
   // Show thread panel
   document.getElementById('chat-no-conv').style.display  = 'none';
@@ -1107,9 +1117,7 @@ async function loadMessages(partnerId) {
     if (conv && users[partnerId]) {
       conv._linkedUser = users[partnerId];
       renderConvList(_allConvs);
-      // Re-mark active
-      document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
-      document.querySelector(`.conv-item[onclick*="openConv(${partnerId},"]`)?.classList.add('active');
+      document.querySelector(`.conv-item[data-pid="${partnerId}"]`)?.classList.add('active');
     }
 
     if (!msgs.length) {
