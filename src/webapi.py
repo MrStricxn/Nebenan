@@ -107,6 +107,46 @@ class WSHandler(logging.Handler):
 
 # ─── Lifespan ──────────────────────────────────────────────────────────────────
 
+async def _poll_new_messages(interval: int = 60) -> None:
+    """Background task: poll all accounts for new messages, broadcast via WS."""
+    await asyncio.sleep(15)          # wait for startup to settle
+    last_seen: dict[str, int] = {}   # "account:partner_id" -> last message id
+    initialized = False
+
+    while True:
+        try:
+            accounts = state.pool._accounts if state.pool else {}
+            for name, storage in accounts.items():
+                token = get_token(storage)
+                if not token:
+                    continue
+                try:
+                    convs = await fetch_conversations(token, per_page=30)
+                    for conv in convs:
+                        pid      = conv.get("partner_id")
+                        last_msg = conv.get("last_private_conversation_message") or {}
+                        msg_id   = last_msg.get("id")
+                        key      = f"{name}:{pid}"
+                        if msg_id and initialized and last_seen.get(key) != msg_id:
+                            preview = (last_msg.get("body") or "")[:80]
+                            await broadcaster.broadcast({
+                                "type":       "new_message",
+                                "account":    name,
+                                "partner_id": pid,
+                                "preview":    preview,
+                            })
+                            log.info(f"[{name}] новое сообщение от partner_id={pid}")
+                        if msg_id:
+                            last_seen[key] = msg_id
+                except Exception as e:
+                    log.debug(f"poll [{name}]: {e}")
+        except Exception as e:
+            log.debug(f"poll cycle error: {e}")
+
+        initialized = True
+        await asyncio.sleep(interval)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     os.makedirs("data", exist_ok=True)
@@ -137,8 +177,11 @@ async def lifespan(app: FastAPI):
 
     state.conn = await init_db("data/nebena.db")
 
+    poll_task = asyncio.create_task(_poll_new_messages())
+
     yield
 
+    poll_task.cancel()
     if state.scheduler_task and not state.scheduler_task.done():
         state.scheduler_task.cancel()
     await state.conn.close()

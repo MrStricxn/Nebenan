@@ -1,0 +1,15 @@
+__pycache__
+*.pyc
+*.pyo
+.git
+.gitignore
+data/
+logs/
+*.log
+tests/
+docs/
+*.png
+dump_*.py
+analyze_*.py
+sniff_*.py
+save_cookies.py
