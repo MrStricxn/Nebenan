@@ -5,327 +5,448 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEbena</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:     #06080F;
-  --s0:     #0A0D1A;
-  --s1:     #0F1325;
-  --s2:     #151A2E;
-  --bd:     #1C2240;
-  --bd2:    #242C50;
-  --am:     #E8A020;
-  --am10:   rgba(232,160,32,.10);
-  --am20:   rgba(232,160,32,.20);
-  --bl:     #4B6CF7;
-  --bl10:   rgba(75,108,247,.10);
-  --gn:     #22C55E;
-  --gn10:   rgba(34,197,94,.10);
-  --rd:     #EF4444;
-  --rd10:   rgba(239,68,68,.10);
-  --yw:     #F59E0B;
-  --t1:     #E8EBF5;
-  --t2:     #5E6E90;
-  --t3:     #2A334F;
-  --r:      4px;
-  --mono:   'JetBrains Mono', monospace;
+  --bg:    #05070E;
+  --s0:    #090C18;
+  --s1:    #0D1121;
+  --s2:    #12172B;
+  --bd:    #19203A;
+  --bd2:   #202844;
+  --am:    #E8A020;
+  --am10:  rgba(232,160,32,.10);
+  --am20:  rgba(232,160,32,.20);
+  --bl:    #4B6CF7;
+  --bl10:  rgba(75,108,247,.10);
+  --gn:    #22C55E;
+  --gn10:  rgba(34,197,94,.10);
+  --rd:    #EF4444;
+  --rd10:  rgba(239,68,68,.10);
+  --yw:    #F59E0B;
+  --t1:    #E4E8F4;
+  --t2:    #566080;
+  --t3:    #232C45;
+  --r:     8px;
+  --mono:  'JetBrains Mono', monospace;
+  --sh:    0 2px 12px rgba(0,0,0,.4);
+  --sh-sm: 0 1px 4px rgba(0,0,0,.3);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5}
-a{text-decoration:none;color:inherit}
-button{font-family:inherit;cursor:pointer;border:none;outline:none}
-input,select,textarea{font-family:inherit;outline:none}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+html, body { height: 100%; background: var(--bg); color: var(--t1); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.5 }
+a { text-decoration: none; color: inherit }
+button { font-family: inherit; cursor: pointer; border: none; outline: none }
+input, select, textarea { font-family: inherit; outline: none }
+::-webkit-scrollbar { width: 4px; height: 4px }
+::-webkit-scrollbar-track { background: transparent }
+::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 4px }
+::-webkit-scrollbar-thumb:hover { background: var(--t3) }
 
 /* ── Topbar ── */
-.topbar{
-  position:fixed;top:0;left:0;right:0;height:52px;
-  background:var(--s0);border-bottom:1px solid var(--bd);
-  display:flex;align-items:center;padding:0 20px;gap:0;z-index:200;
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; height: 54px;
+  background: var(--s0); border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; padding: 0 22px; gap: 0; z-index: 200;
 }
-.brand{
-  font-size:15px;font-weight:600;letter-spacing:.5px;
-  color:var(--am);margin-right:32px;display:flex;align-items:center;gap:8px;flex-shrink:0;
+.brand {
+  font-size: 15px; font-weight: 700; letter-spacing: .4px;
+  color: var(--am); margin-right: 28px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;
 }
-.brand-dot{
-  width:7px;height:7px;border-radius:50%;background:var(--am);
-  box-shadow:0 0 8px var(--am);
+.brand-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--am);
+  box-shadow: 0 0 10px var(--am), 0 0 4px var(--am);
 }
-.topnav{display:flex;align-items:center;gap:2px;flex:1}
-.topnav a{
-  padding:6px 14px;border-radius:var(--r);color:var(--t2);font-size:13.5px;font-weight:500;
-  transition:color .15s,background .15s;white-space:nowrap;
+.topnav { display: flex; align-items: center; gap: 1px; flex: 1 }
+.topnav a {
+  padding: 6px 13px; border-radius: var(--r); color: var(--t2); font-size: 13px; font-weight: 500;
+  transition: color .15s, background .15s; white-space: nowrap;
 }
-.topnav a:hover{color:var(--t1);background:var(--s1)}
-.topnav a.active{color:var(--am);background:var(--am10)}
-.topbar-right{
-  display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:auto;
+.topnav a:hover { color: var(--t1); background: var(--s1) }
+.topnav a.active { color: var(--am); background: var(--am10) }
+.topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto }
+.ws-indicator { display: flex; align-items: center; gap: 6px; color: var(--t2); font-size: 12px }
+.ws-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--t3);
+  transition: background .3s, box-shadow .3s;
 }
-.ws-indicator{display:flex;align-items:center;gap:6px;color:var(--t2);font-size:12.5px}
-.ws-dot{
-  width:6px;height:6px;border-radius:50%;background:var(--t3);
-  transition:background .3s,box-shadow .3s;
-}
-.ws-dot.on{background:var(--gn);box-shadow:0 0 6px var(--gn)}
-.ws-dot.busy{background:var(--am);box-shadow:0 0 6px var(--am);animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-#task-label{font-size:12.5px;color:var(--t2)}
+.ws-dot.on   { background: var(--gn); box-shadow: 0 0 7px var(--gn) }
+.ws-dot.busy { background: var(--am); box-shadow: 0 0 7px var(--am); animation: pulse 1s infinite }
+@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }
+#task-label { font-size: 12px; color: var(--t2) }
 
 /* ── Layout ── */
-.content{margin-top:52px;min-height:calc(100vh - 52px);padding:28px 28px 40px}
-.page{display:none}
-.page.active{display:block}
-#page-chat.active{display:flex}
+.content { margin-top: 54px; min-height: calc(100vh - 54px); padding: 28px 28px 48px }
+.content.chat-mode { padding: 0; overflow: hidden }
+.page { display: none }
+.page.active { display: block }
+#page-chat.active { display: flex; flex-direction: column; height: calc(100vh - 54px) }
 
 /* ── Page header ── */
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.page-title{font-size:20px;font-weight:600;color:var(--t1)}
-.page-sub{font-size:13px;color:var(--t2);margin-top:2px}
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px }
+.page-title  { font-size: 20px; font-weight: 700; color: var(--t1) }
+.page-sub    { font-size: 12.5px; color: var(--t2); margin-top: 3px }
 
 /* ── Stat cards ── */
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-.stat-card{
-  background:var(--s0);border:1px solid var(--bd);border-radius:var(--r);
-  padding:18px 20px;position:relative;overflow:hidden;
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px }
+.stat-card {
+  background: var(--s0); border: 1px solid var(--bd); border-radius: var(--r);
+  padding: 18px 20px; position: relative; overflow: hidden; box-shadow: var(--sh-sm);
 }
-.stat-card::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:var(--accent-color,var(--am));
+.stat-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--accent-color, var(--am));
 }
-.stat-card.blue{--accent-color:var(--bl)}
-.stat-card.green{--accent-color:var(--gn)}
-.stat-card.red{--accent-color:var(--rd)}
-.stat-label{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;color:var(--t2);margin-bottom:8px}
-.stat-val{font-size:28px;font-weight:600;color:var(--t1);line-height:1}
-.stat-sub{font-size:12px;color:var(--t3);margin-top:6px}
+.stat-card.blue  { --accent-color: var(--bl) }
+.stat-card.green { --accent-color: var(--gn) }
+.stat-card.red   { --accent-color: var(--rd) }
+.stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .7px; color: var(--t2); margin-bottom: 10px }
+.stat-val   { font-size: 30px; font-weight: 700; color: var(--t1); line-height: 1; font-family: var(--mono) }
+.stat-sub   { font-size: 11.5px; color: var(--t3); margin-top: 7px }
 
 /* ── Cards ── */
-.card{background:var(--s0);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
-.card-head{
-  padding:14px 18px;border-bottom:1px solid var(--bd);
-  display:flex;align-items:center;justify-content:space-between;
+.card { background: var(--s0); border: 1px solid var(--bd); border-radius: var(--r); overflow: hidden; margin-bottom: 16px; box-shadow: var(--sh-sm) }
+.card-head {
+  padding: 13px 18px; border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: space-between;
 }
-.card-title{font-size:13px;font-weight:600;color:var(--t1)}
-.card-body{padding:18px}
-.card-body.no-pad{padding:0}
+.card-title { font-size: 12.5px; font-weight: 600; color: var(--t1); text-transform: uppercase; letter-spacing: .4px }
+.card-body { padding: 18px }
+.card-body.no-pad { padding: 0 }
 
 /* ── Tables ── */
-.tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl th{
-  padding:10px 14px;text-align:left;font-size:11px;font-weight:600;
-  text-transform:uppercase;letter-spacing:.5px;color:var(--t2);
-  border-bottom:1px solid var(--bd);background:var(--s1);
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px }
+.tbl th {
+  padding: 9px 14px; text-align: left; font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .5px; color: var(--t2);
+  border-bottom: 1px solid var(--bd); background: var(--s1);
 }
-.tbl td{padding:10px 14px;border-bottom:1px solid var(--bd);color:var(--t1)}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:var(--s1)}
-.tbl-empty{padding:32px;text-align:center;color:var(--t2)}
-.badge{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:3px 8px;border-radius:3px;font-size:11.5px;font-weight:500;
-}
-.badge-sent{background:var(--gn10);color:var(--gn)}
-.badge-wait{background:var(--am10);color:var(--am)}
-.badge-new{background:var(--bl10);color:var(--bl)}
-.dot{width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block}
+.tbl td { padding: 10px 14px; border-bottom: 1px solid var(--bd); color: var(--t1) }
+.tbl tr:last-child td { border-bottom: none }
+.tbl tr:hover td { background: var(--s1) }
+.tbl-empty { padding: 32px; text-align: center; color: var(--t2); font-size: 13px }
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 500 }
+.badge-sent { background: var(--gn10); color: var(--gn) }
+.badge-wait { background: var(--am10); color: var(--am) }
+.badge-new  { background: var(--bl10); color: var(--bl) }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; display: inline-block }
 
 /* ── Buttons ── */
-.btn{
-  display:inline-flex;align-items:center;gap:7px;
-  padding:8px 16px;border-radius:var(--r);font-size:13px;font-weight:500;
-  transition:opacity .15s,background .15s;
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: var(--r); font-size: 13px; font-weight: 500;
+  transition: opacity .15s, background .15s, transform .1s;
 }
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-primary{background:var(--am);color:#000}
-.btn-primary:hover:not(:disabled){background:#D4911C}
-.btn-secondary{background:var(--s1);color:var(--t1);border:1px solid var(--bd)}
-.btn-secondary:hover:not(:disabled){background:var(--s2)}
-.btn-blue{background:var(--bl);color:#fff}
-.btn-blue:hover:not(:disabled){background:#3A5BE0}
-.btn-danger{background:var(--rd10);color:var(--rd);border:1px solid rgba(239,68,68,.2)}
-.btn-danger:hover:not(:disabled){background:rgba(239,68,68,.2)}
-.btn-sm{padding:5px 11px;font-size:12px}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn:active:not(:disabled) { transform: scale(.97) }
+.btn:disabled { opacity: .4; cursor: not-allowed }
+.btn-primary   { background: var(--am); color: #000 }
+.btn-primary:hover:not(:disabled) { background: #D4911C }
+.btn-secondary { background: var(--s1); color: var(--t1); border: 1px solid var(--bd) }
+.btn-secondary:hover:not(:disabled) { background: var(--s2); border-color: var(--bd2) }
+.btn-blue   { background: var(--bl); color: #fff }
+.btn-blue:hover:not(:disabled) { background: #3A5BE0 }
+.btn-danger { background: var(--rd10); color: var(--rd); border: 1px solid rgba(239,68,68,.25) }
+.btn-danger:hover:not(:disabled) { background: rgba(239,68,68,.2) }
+.btn-sm  { padding: 5px 11px; font-size: 12px }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap }
 
 /* ── Forms ── */
-.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
-.field label{display:block;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;letter-spacing:.3px}
-.field input,.field select{
-  width:100%;background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
-  color:var(--t1);padding:8px 12px;font-size:13.5px;transition:border .15s;
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px }
+.field label { display: block; font-size: 11.5px; font-weight: 600; color: var(--t2); margin-bottom: 6px; letter-spacing: .3px; text-transform: uppercase }
+.field input, .field select {
+  width: 100%; background: var(--s1); border: 1px solid var(--bd); border-radius: var(--r);
+  color: var(--t1); padding: 8px 12px; font-size: 13.5px; transition: border .15s;
 }
-.field input:focus,.field select:focus{border-color:var(--bd2)}
-.field-note{font-size:11.5px;color:var(--t3);margin-top:5px}
-.section-label{
-  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;
-  color:var(--t3);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--bd);
+.field input:focus, .field select:focus { border-color: var(--am) }
+.field-note { font-size: 11px; color: var(--t3); margin-top: 5px }
+.section-label {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px;
+  color: var(--t3); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--bd);
 }
-.settings-section{margin-bottom:28px}
+.settings-section { margin-bottom: 28px }
 
 /* ── Account cards ── */
-.acct-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.acct-card{
-  background:var(--s0);border:1px solid var(--bd);border-radius:var(--r);
-  padding:16px 18px;display:flex;flex-direction:column;gap:10px;
+.acct-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px }
+.acct-card {
+  background: var(--s0); border: 1px solid var(--bd); border-radius: var(--r);
+  padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--sh-sm);
 }
-.acct-top{display:flex;align-items:center;gap:12px}
-.acct-avatar{
-  width:36px;height:36px;border-radius:50%;background:var(--s2);
-  display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:14px;flex-shrink:0;
+.acct-top    { display: flex; align-items: center; gap: 12px }
+.acct-avatar {
+  width: 38px; height: 38px; border-radius: 50%; background: var(--s2);
+  display: flex; align-items: center; justify-content: center; color: var(--t2); font-size: 16px; flex-shrink: 0;
 }
-.acct-name{font-size:13.5px;font-weight:500;color:var(--t1);word-break:break-all}
-.acct-status{display:flex;align-items:center;gap:6px;font-size:12px}
-.status-badge{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:3px 9px;border-radius:3px;font-size:12px;font-weight:500;
+.acct-name   { font-size: 13.5px; font-weight: 600; color: var(--t1); word-break: break-all }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 4px; font-size: 11.5px; font-weight: 600;
 }
-.status-ok{background:var(--gn10);color:var(--gn)}
-.status-err{background:var(--rd10);color:var(--rd)}
-.status-unk{background:var(--s1);color:var(--t2)}
-.status-chk{background:var(--am10);color:var(--am)}
-.acct-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.status-ok  { background: var(--gn10); color: var(--gn) }
+.status-err { background: var(--rd10); color: var(--rd) }
+.status-unk { background: var(--s2);   color: var(--t2) }
+.status-chk { background: var(--am10); color: var(--am) }
+.acct-dot   { width: 6px; height: 6px; border-radius: 50%; background: currentColor }
 
 /* ── Dashboard activity ── */
-.activity-list{display:flex;flex-direction:column;gap:0}
-.activity-item{
-  display:flex;align-items:baseline;gap:10px;
-  padding:8px 18px;border-bottom:1px solid var(--bd);font-size:12.5px;
+.activity-list { display: flex; flex-direction: column }
+.activity-item {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 8px 18px; border-bottom: 1px solid var(--bd); font-size: 12.5px;
 }
-.activity-item:last-child{border-bottom:none}
-.activity-time{color:var(--t3);font-family:var(--mono);font-size:11px;flex-shrink:0;width:56px}
-.activity-text{color:var(--t2);flex:1;line-height:1.4}
-.activity-text.err{color:var(--rd)}
-.activity-text.warn{color:var(--yw)}
-.activity-text.info{color:var(--t2)}
+.activity-item:last-child { border-bottom: none }
+.activity-time { color: var(--t3); font-family: var(--mono); font-size: 11px; flex-shrink: 0; width: 56px }
+.activity-text { color: var(--t2); flex: 1; line-height: 1.45 }
+.activity-text.err     { color: var(--rd) }
+.activity-text.warning { color: var(--yw) }
+.activity-text.info    { color: var(--t2) }
 
 /* ── Quick actions ── */
-.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px}
-.quick-card{
-  background:var(--s0);border:1px solid var(--bd);border-radius:var(--r);
-  padding:16px 18px;cursor:pointer;transition:border-color .15s,background .15s;
-  display:flex;flex-direction:column;gap:6px;
+.quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 12px; margin-bottom: 24px }
+.quick-card {
+  background: var(--s0); border: 1px solid var(--bd); border-radius: var(--r);
+  padding: 16px 18px; cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s;
+  display: flex; flex-direction: column; gap: 6px; box-shadow: var(--sh-sm);
 }
-.quick-card:hover{border-color:var(--bd2);background:var(--s1)}
-.quick-icon{font-size:20px;line-height:1}
-.quick-name{font-size:13px;font-weight:600;color:var(--t1)}
-.quick-desc{font-size:11.5px;color:var(--t2)}
+.quick-card:hover { border-color: var(--am); background: var(--am10); box-shadow: 0 0 0 1px var(--am10) }
+.quick-icon { font-size: 22px; line-height: 1; margin-bottom: 2px }
+.quick-name { font-size: 13px; font-weight: 600; color: var(--t1) }
+.quick-desc { font-size: 11.5px; color: var(--t2) }
+
+/* ── Sender status bar ── */
+.sender-status-bar {
+  background: var(--s0); border: 1px solid var(--bd); border-radius: var(--r);
+  padding: 12px 18px; margin-bottom: 16px; display: none; align-items: center; gap: 16px; flex-wrap: wrap;
+  box-shadow: var(--sh-sm);
+}
+.sender-status-bar.visible { display: flex }
 
 /* ── Log Drawer ── */
-.log-drawer{
-  position:fixed;bottom:0;left:0;right:0;z-index:300;
-  background:var(--s0);border-top:1px solid var(--bd);
-  transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);
+.log-drawer {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: var(--s0); border-top: 1px solid var(--bd);
+  transform: translateY(100%); transition: transform .25s cubic-bezier(.4,0,.2,1);
 }
-.log-drawer.show{transform:translateY(0)}
-.log-drawer-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 16px;border-bottom:1px solid var(--bd);
+.log-drawer.show { transform: translateY(0) }
+.log-drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 16px; border-bottom: 1px solid var(--bd);
 }
-.log-drawer-title{font-size:12px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.5px}
-.log-drawer-actions{display:flex;gap:6px}
-.log-drawer-btn{
-  background:none;color:var(--t2);padding:3px 8px;border-radius:3px;font-size:11.5px;
-  transition:color .15s,background .15s;
+.log-drawer-title   { font-size: 11.5px; font-weight: 600; color: var(--t2); text-transform: uppercase; letter-spacing: .5px }
+.log-drawer-actions { display: flex; gap: 4px }
+.log-drawer-btn {
+  background: none; color: var(--t2); padding: 3px 8px; border-radius: 4px; font-size: 11.5px;
+  transition: color .15s, background .15s;
 }
-.log-drawer-btn:hover{color:var(--t1);background:var(--s1)}
-.log-drawer-entries{
-  max-height:140px;overflow-y:auto;padding:4px 0;
+.log-drawer-btn:hover { color: var(--t1); background: var(--s1) }
+.log-drawer-entries { max-height: 120px; overflow-y: auto; padding: 4px 0 }
+.log-entry {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 3px 16px; font-size: 12px; font-family: var(--mono);
 }
-.log-entry{
-  display:flex;align-items:baseline;gap:10px;
-  padding:4px 16px;font-size:12.5px;font-family:var(--mono);
-}
-.log-entry:hover{background:var(--s1)}
-.log-time{color:var(--t3);font-size:11px;flex-shrink:0;width:54px}
-.log-text{flex:1;line-height:1.4;white-space:pre-wrap;word-break:break-word}
-.log-text.info{color:var(--t2)}
-.log-text.warning{color:var(--yw)}
-.log-text.error{color:var(--rd)}
-.log-text.debug{color:var(--t3)}
+.log-entry:hover { background: var(--s1) }
+.log-time { color: var(--t3); font-size: 10.5px; flex-shrink: 0; width: 54px }
+.log-text { flex: 1; line-height: 1.4; white-space: pre-wrap; word-break: break-word }
+.log-text.info    { color: var(--t2) }
+.log-text.warning { color: var(--yw) }
+.log-text.error   { color: var(--rd) }
+.log-text.debug   { color: var(--t3) }
 
 /* ── Toast ── */
-.toast-wrap{position:fixed;top:62px;right:16px;z-index:500;display:flex;flex-direction:column;gap:8px}
-.toast{
-  background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
-  padding:10px 14px;font-size:13px;color:var(--t1);min-width:200px;
-  animation:toastIn .2s ease;box-shadow:0 4px 16px rgba(0,0,0,.4);
+.toast-wrap { position: fixed; top: 64px; right: 16px; z-index: 500; display: flex; flex-direction: column; gap: 8px }
+.toast {
+  background: var(--s1); border: 1px solid var(--bd); border-radius: var(--r);
+  padding: 10px 14px; font-size: 13px; color: var(--t1); min-width: 200px;
+  animation: toastIn .2s ease; box-shadow: var(--sh);
 }
-.toast.ok{border-left:3px solid var(--gn)}
-.toast.err{border-left:3px solid var(--rd)}
-@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.toast.ok  { border-left: 3px solid var(--gn) }
+.toast.err { border-left: 3px solid var(--rd) }
+@keyframes toastIn { from { opacity: 0; transform: translateX(20px) } to { opacity: 1; transform: translateX(0) } }
 
 /* ── Misc ── */
-.divider{height:1px;background:var(--bd);margin:20px 0}
-.text-muted{color:var(--t2)}
-.text-sm{font-size:12px}
-.mono{font-family:var(--mono)}
-.gap{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.fill{flex:1}
-.spinner{
-  width:14px;height:14px;border:2px solid var(--bd2);border-top-color:var(--am);
-  border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;
+.divider    { height: 1px; background: var(--bd); margin: 20px 0 }
+.text-muted { color: var(--t2) }
+.text-sm    { font-size: 12px }
+.mono       { font-family: var(--mono) }
+.gap        { display: flex; gap: 10px; flex-wrap: wrap; align-items: center }
+.fill       { flex: 1 }
+.spinner {
+  width: 14px; height: 14px; border: 2px solid var(--bd2); border-top-color: var(--am);
+  border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; display: inline-block;
 }
-@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spin { to { transform: rotate(360deg) } }
 
-/* ── Chat ── */
-#page-chat{display:flex;flex-direction:column;height:calc(100vh - 110px);padding:0;gap:0}
-.chat-wrap{display:flex;flex:1;min-height:0;border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--s0)}
-.chat-sidebar{width:320px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--s0)}
-.chat-acct-bar{padding:10px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
-.chat-acct-bar select{flex:1;background:var(--s1);border:1px solid var(--bd);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px;cursor:pointer}
-.chat-search{padding:10px 12px;border-bottom:1px solid var(--bd)}
-.chat-search input{width:100%;background:var(--s1);border:1px solid var(--bd);color:var(--t1);padding:7px 12px;border-radius:8px;font-size:13px;box-sizing:border-box}
-.chat-search input::placeholder{color:var(--t2)}
-.conv-list{flex:1;overflow-y:auto;padding:4px 0}
-.conv-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-radius:0;transition:background .15s;border-bottom:1px solid var(--bd)}
-.conv-item:hover{background:var(--s1)}
-.conv-item.active{background:rgba(232,160,32,.1);border-left:3px solid var(--am)}
-.conv-avatar{width:42px;height:42px;border-radius:50%;background:var(--s2);flex-shrink:0;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--t2)}
-.conv-avatar img{width:42px;height:42px;border-radius:50%;object-fit:cover}
-.conv-info{flex:1;min-width:0}
-.conv-name{font-weight:600;font-size:14px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.conv-last{font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
-.conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-.conv-time{font-size:11px;color:var(--t2)}
-.conv-unread{background:var(--am);color:#000;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
-.chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
-.chat-header{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;background:var(--s0)}
-.chat-header-name{font-weight:700;font-size:16px;color:var(--t1)}
-.chat-header-sub{font-size:12px;color:var(--t2);margin-top:2px}
-.chat-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
-.chat-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:14px}
-.msg-row{display:flex;gap:10px;max-width:75%}
-.msg-row.me{align-self:flex-end;flex-direction:row-reverse}
-.msg-avatar{width:32px;height:32px;border-radius:50%;background:var(--s2);flex-shrink:0;object-fit:cover}
-.msg-avatar img{width:32px;height:32px;border-radius:50%;object-fit:cover}
-.msg-bubble{background:var(--s1);border-radius:14px;padding:10px 14px;font-size:14px;color:var(--t1);line-height:1.5;position:relative;max-width:100%}
-.msg-row.me .msg-bubble{background:var(--am);color:#000}
-.msg-time{font-size:11px;color:var(--t2);margin-top:4px;display:flex;align-items:center;gap:6px}
-.msg-row.me .msg-time{justify-content:flex-end}
-.msg-translate-btn{font-size:11px;color:var(--t2);background:none;border:1px solid var(--bd);border-radius:4px;padding:1px 5px;cursor:pointer;line-height:1.4;white-space:nowrap}
-.msg-translate-btn:hover{background:var(--s2);color:var(--t1)}
-.msg-translation{margin-top:6px;padding:7px 10px;background:rgba(0,0,0,.06);border-left:2px solid var(--am);border-radius:0 6px 6px 0;font-size:13px;color:var(--t1);line-height:1.45}
-.msg-row.me .msg-translation{background:rgba(0,0,0,.12);border-left-color:rgba(0,0,0,.3)}
-.msg-embed{margin-top:10px;background:var(--s0);border:1px solid var(--bd);border-radius:10px;overflow:hidden;font-size:12px}
-.msg-embed-imgs{display:flex;gap:4px;padding:8px}
-.msg-embed-imgs img{width:80px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer}
-.msg-embed-body{padding:8px 10px;color:var(--t1);font-weight:600}
-.msg-embed-desc{padding:0 10px 8px;color:var(--t2);font-size:11px;line-height:1.4}
-.chat-compose{border-top:1px solid var(--bd);padding:14px 18px;display:flex;flex-direction:column;gap:10px;background:var(--s0)}
-.compose-photos{display:flex;flex-wrap:wrap;gap:8px}
-.compose-photo-preview{position:relative;width:64px;height:64px}
-.compose-photo-preview img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--bd)}
-.compose-photo-preview .rm-photo{position:absolute;top:-6px;right:-6px;background:#e53e3e;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;line-height:18px;text-align:center;padding:0}
-.compose-row{display:flex;gap:10px;align-items:flex-end}
-.compose-textarea{flex:1;background:var(--s1);border:1px solid var(--bd);color:var(--t1);border-radius:10px;padding:10px 14px;font-size:14px;resize:none;font-family:inherit;min-height:44px;max-height:200px;transition:border-color .2s}
-.compose-textarea:focus{outline:none;border-color:var(--am)}
-.compose-textarea::placeholder{color:var(--t2)}
-.btn-attach{background:var(--s1);border:1px solid var(--bd);color:var(--t2);border-radius:10px;padding:10px 12px;cursor:pointer;font-size:18px;flex-shrink:0;transition:all .15s}
-.btn-attach:hover{border-color:var(--am);color:var(--am)}
-.btn-chat-send{background:var(--am);border:none;color:#000;border-radius:10px;padding:10px 20px;cursor:pointer;font-weight:700;font-size:14px;flex-shrink:0;transition:opacity .15s}
-.btn-chat-send:hover{opacity:.85}
-.btn-chat-send:disabled{opacity:.4;cursor:not-allowed}
-.chat-no-conv{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--t2);gap:8px}
-.chat-no-conv svg{opacity:.3}
+/* ══════════ CHAT ══════════ */
+#page-chat { padding: 0; gap: 0 }
+.chat-wrap {
+  display: flex; flex: 1; min-height: 0;
+  border-top: 1px solid var(--bd); background: var(--s0);
+}
+
+/* Sidebar */
+.chat-sidebar {
+  width: 300px; flex-shrink: 0; border-right: 1px solid var(--bd);
+  display: flex; flex-direction: column; background: var(--s0);
+}
+.chat-acct-bar {
+  padding: 10px 12px; border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; gap: 8px;
+}
+.chat-acct-bar label { font-size: 11px; color: var(--t2); flex-shrink: 0; font-weight: 600; text-transform: uppercase; letter-spacing: .4px }
+.chat-acct-bar select {
+  flex: 1; background: var(--s1); border: 1px solid var(--bd);
+  color: var(--t1); padding: 5px 8px; border-radius: 6px; font-size: 12.5px; cursor: pointer;
+}
+.chat-refresh-btn {
+  background: var(--s1); border: 1px solid var(--bd); color: var(--t2);
+  padding: 5px 9px; border-radius: 6px; font-size: 13px; cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.chat-refresh-btn:hover { color: var(--am); border-color: var(--am) }
+.chat-search { padding: 8px 10px; border-bottom: 1px solid var(--bd) }
+.chat-search input {
+  width: 100%; background: var(--s1); border: 1px solid var(--bd);
+  color: var(--t1); padding: 7px 12px; border-radius: 8px; font-size: 13px;
+}
+.chat-search input::placeholder { color: var(--t2) }
+.chat-search input:focus { border-color: var(--bd2) }
+
+.conv-list { flex: 1; overflow-y: auto }
+.conv-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; cursor: pointer; transition: background .12s;
+  border-bottom: 1px solid var(--bd); position: relative;
+}
+.conv-item:hover { background: var(--s1) }
+.conv-item.active {
+  background: var(--am10);
+}
+.conv-item.active::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--am);
+}
+.conv-avatar {
+  width: 40px; height: 40px; border-radius: 50%; background: var(--s2); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--t2);
+}
+.conv-avatar img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover }
+.conv-info   { flex: 1; min-width: 0 }
+.conv-name   { font-weight: 600; font-size: 13.5px; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.conv-last   { font-size: 11.5px; color: var(--t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px }
+.conv-meta   { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0 }
+.conv-time   { font-size: 10.5px; color: var(--t3) }
+.conv-unread {
+  background: var(--am); color: #000; font-size: 10px; font-weight: 700;
+  padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center;
+}
+
+/* Main panel */
+.chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0 }
+.chat-no-conv {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--t3); gap: 12px;
+}
+.chat-no-conv span { font-size: 13.5px; color: var(--t2) }
+
+.chat-thread { display: none; flex-direction: column; flex: 1; min-height: 0 }
+.chat-thread.open { display: flex }
+
+.chat-header {
+  padding: 12px 18px; border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.chat-hdr-avatar {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--s2);
+  display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--t2); flex-shrink: 0;
+}
+.chat-hdr-avatar img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover }
+.chat-header-name { font-weight: 700; font-size: 15px; color: var(--t1) }
+.chat-header-sub  { font-size: 11.5px; color: var(--t2); margin-top: 1px }
+.chat-hdr-reload  {
+  margin-left: auto; background: none; border: 1px solid var(--bd);
+  color: var(--t2); padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.chat-hdr-reload:hover { color: var(--am); border-color: var(--am) }
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 16px 20px;
+  display: flex; flex-direction: column; gap: 10px; min-height: 0;
+}
+.chat-empty { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--t2); font-size: 13px }
+
+/* Messages */
+.msg-row    { display: flex; gap: 8px; max-width: 78%; align-self: flex-start }
+.msg-row.me { align-self: flex-end; flex-direction: row-reverse }
+.msg-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--s2); flex-shrink: 0; object-fit: cover }
+.msg-avatar img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover }
+.msg-body-wrap { display: flex; flex-direction: column; min-width: 0 }
+.msg-bubble {
+  background: var(--s2); border: 1px solid var(--bd); border-radius: 0 12px 12px 12px;
+  padding: 9px 14px; font-size: 13.5px; color: var(--t1); line-height: 1.55; max-width: 100%;
+  word-break: break-word;
+}
+.msg-row.me .msg-bubble {
+  background: var(--am20); border-color: var(--am20); color: var(--t1);
+  border-radius: 12px 0 12px 12px;
+}
+.msg-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap }
+.msg-time { font-size: 10.5px; color: var(--t3) }
+.msg-row.me .msg-meta { justify-content: flex-end }
+.msg-translate-btn {
+  font-size: 10.5px; color: var(--t3); background: none;
+  border: 1px solid var(--bd); border-radius: 4px; padding: 1px 6px; cursor: pointer; line-height: 1.5;
+  transition: color .12s, border-color .12s;
+}
+.msg-translate-btn:hover   { color: var(--am); border-color: var(--am) }
+.msg-translate-btn:disabled { opacity: .5; cursor: not-allowed }
+.msg-translation {
+  margin-top: 6px; padding: 7px 10px;
+  background: var(--am10); border-left: 2px solid var(--am);
+  border-radius: 0 6px 6px 0; font-size: 13px; color: var(--t1); line-height: 1.5;
+}
+.msg-embed {
+  margin-top: 8px; background: var(--s0); border: 1px solid var(--bd);
+  border-radius: 8px; overflow: hidden; font-size: 12px;
+}
+.msg-embed-imgs   { display: flex; gap: 4px; padding: 8px }
+.msg-embed-imgs img { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; cursor: pointer }
+.msg-embed-body   { padding: 6px 10px; color: var(--t1); font-weight: 600; font-size: 13px }
+.msg-embed-desc   { padding: 0 10px 8px; color: var(--t2); font-size: 11px; line-height: 1.4 }
+
+/* Compose */
+.chat-compose {
+  border-top: 1px solid var(--bd); padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 8px; background: var(--s0); flex-shrink: 0;
+}
+.compose-photos { display: flex; flex-wrap: wrap; gap: 8px }
+.compose-photo-preview { position: relative; width: 60px; height: 60px }
+.compose-photo-preview img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--bd) }
+.compose-photo-preview .rm-photo {
+  position: absolute; top: -5px; right: -5px; background: var(--rd); color: #fff;
+  border: none; border-radius: 50%; width: 17px; height: 17px; cursor: pointer;
+  font-size: 10px; line-height: 17px; text-align: center; padding: 0;
+}
+.compose-row     { display: flex; gap: 8px; align-items: flex-end }
+.compose-textarea {
+  flex: 1; background: var(--s1); border: 1px solid var(--bd); color: var(--t1);
+  border-radius: 10px; padding: 10px 14px; font-size: 13.5px; resize: none;
+  font-family: inherit; min-height: 42px; max-height: 180px; transition: border-color .2s;
+  line-height: 1.5;
+}
+.compose-textarea:focus { border-color: var(--am) }
+.compose-textarea::placeholder { color: var(--t2) }
+.btn-attach {
+  background: var(--s1); border: 1px solid var(--bd); color: var(--t2);
+  border-radius: 10px; padding: 9px 12px; cursor: pointer; font-size: 17px; flex-shrink: 0;
+  transition: color .15s, border-color .15s;
+}
+.btn-attach:hover { color: var(--am); border-color: var(--am) }
+.btn-chat-send {
+  background: var(--am); border: none; color: #000; border-radius: 10px;
+  padding: 9px 18px; cursor: pointer; font-weight: 700; font-size: 15px; flex-shrink: 0;
+  transition: opacity .15s, transform .1s;
+}
+.btn-chat-send:hover   { opacity: .88 }
+.btn-chat-send:active  { transform: scale(.95) }
+.btn-chat-send:disabled { opacity: .4; cursor: not-allowed }
 </style>
 </head>
 <body>
@@ -337,7 +458,7 @@ input,select,textarea{font-family:inherit;outline:none}
     <li><a href="#" class="active" data-page="dashboard">Дашборд</a></li>
     <li><a href="#" data-page="parser">Парсер</a></li>
     <li><a href="#" data-page="sender">Рассылка</a></li>
-    <li><a href="#" data-page="chat">💬 Чат</a></li>
+    <li><a href="#" data-page="chat">Чат</a></li>
     <li><a href="#" data-page="inbox">Входящие</a></li>
     <li><a href="#" data-page="accounts">Аккаунты</a></li>
     <li><a href="#" data-page="scheduler">Планировщик</a></li>
@@ -352,7 +473,7 @@ input,select,textarea{font-family:inherit;outline:none}
 </nav>
 
 <!-- ── Content ── -->
-<div class="content">
+<div class="content" id="main-content">
 
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
@@ -362,9 +483,9 @@ input,select,textarea{font-family:inherit;outline:none}
     </div>
     <div class="stat-grid">
       <div class="stat-card">
-        <div class="stat-label">Спарсено</div>
+        <div class="stat-label">Объявлений</div>
         <div class="stat-val" id="st-listings">—</div>
-        <div class="stat-sub">объявлений в базе</div>
+        <div class="stat-sub">в базе</div>
       </div>
       <div class="stat-card blue">
         <div class="stat-label">Продавцы</div>
@@ -390,12 +511,12 @@ input,select,textarea{font-family:inherit;outline:none}
       </div>
       <div class="quick-card" onclick="goPage('sender')">
         <div class="quick-icon">📨</div>
-        <div class="quick-name">Начать рассылку</div>
+        <div class="quick-name">Рассылка</div>
         <div class="quick-desc">Отправить новым продавцам</div>
       </div>
       <div class="quick-card" onclick="goPage('inbox');runInbox()">
         <div class="quick-icon">📥</div>
-        <div class="quick-name">Проверить входящие</div>
+        <div class="quick-name">Входящие</div>
         <div class="quick-desc">Найти и ответить</div>
       </div>
       <div class="quick-card" onclick="goPage('accounts');checkAccounts()">
@@ -411,7 +532,7 @@ input,select,textarea{font-family:inherit;outline:none}
       </div>
       <div class="card-body no-pad">
         <div class="activity-list" id="dash-activity">
-          <div class="tbl-empty text-muted text-sm">Событий пока нет</div>
+          <div class="tbl-empty text-muted">Событий пока нет</div>
         </div>
       </div>
     </div>
@@ -433,7 +554,7 @@ input,select,textarea{font-family:inherit;outline:none}
           </div>
           <div class="field">
             <label>Аккаунтов</label>
-            <input type="text" id="parser-accounts" readonly style="background:var(--s0);cursor:default">
+            <input type="text" id="parser-accounts" readonly style="background:var(--bg);cursor:default;color:var(--t2)">
           </div>
         </div>
         <div class="btn-row">
@@ -445,9 +566,9 @@ input,select,textarea{font-family:inherit;outline:none}
       <div class="card-head"><span class="card-title">Статистика базы</span></div>
       <div class="card-body">
         <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
-          <div><div class="stat-label">Объявлений</div><div class="stat-val" id="p-listings" style="font-size:22px">—</div></div>
-          <div><div class="stat-label">Продавцов</div><div class="stat-val" id="p-sellers" style="font-size:22px">—</div></div>
-          <div><div class="stat-label">В очереди</div><div class="stat-val" id="p-queue" style="font-size:22px">—</div></div>
+          <div><div class="stat-label">Объявлений</div><div class="stat-val" id="p-listings" style="font-size:24px">—</div></div>
+          <div><div class="stat-label">Продавцов</div><div class="stat-val" id="p-sellers" style="font-size:24px">—</div></div>
+          <div><div class="stat-label">В очереди</div><div class="stat-val" id="p-queue" style="font-size:24px">—</div></div>
         </div>
       </div>
     </div>
@@ -458,17 +579,17 @@ input,select,textarea{font-family:inherit;outline:none}
     <div class="page-header">
       <div><div class="page-title">Рассылка</div><div class="page-sub">Отправка сообщений продавцам</div></div>
       <div class="gap">
-        <button class="btn btn-primary" id="btn-send-start" onclick="startSender()">▶ Запустить</button>
-        <button class="btn btn-danger"  id="btn-send-stop"  onclick="stopSender()" disabled style="background:#e53e3e;border-color:#e53e3e">■ Остановить</button>
+        <button class="btn btn-primary"   id="btn-send-start" onclick="startSender()">▶ Запустить</button>
+        <button class="btn btn-danger"    id="btn-send-stop"  onclick="stopSender()" disabled>■ Остановить</button>
         <button class="btn btn-secondary" onclick="loadQueue()">↺ Обновить</button>
       </div>
     </div>
-    <div id="sender-status-bar" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin-bottom:16px;display:none;align-items:center;gap:16px;flex-wrap:wrap">
-      <span class="status-badge status-ok" style="font-size:12px"><span class="acct-dot"></span> Работает</span>
-      <span id="sender-cycle-label" style="font-weight:600;color:var(--text)"></span>
-      <span id="sender-countdown" style="font-family:var(--mono);color:var(--muted);font-size:13px"></span>
+    <div class="sender-status-bar" id="sender-status-bar">
+      <span class="status-badge status-ok"><span class="acct-dot"></span> Работает</span>
+      <span id="sender-cycle-label" style="font-weight:600;color:var(--t1)"></span>
+      <span id="sender-countdown"   style="font-family:var(--mono);color:var(--t2);font-size:12.5px"></span>
     </div>
-    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);max-width:600px;margin-bottom:20px">
+    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);max-width:560px;margin-bottom:20px">
       <div class="stat-card"><div class="stat-label">В очереди</div><div class="stat-val" id="s-queue">—</div></div>
       <div class="stat-card green"><div class="stat-label">Отправлено</div><div class="stat-val" id="s-sent">—</div></div>
       <div class="stat-card blue"><div class="stat-label">Шаблонов</div><div class="stat-val" id="s-tpls">—</div></div>
@@ -490,35 +611,36 @@ input,select,textarea{font-family:inherit;outline:none}
   <!-- CHAT -->
   <div class="page" id="page-chat">
     <div class="chat-wrap">
-      <!-- Sidebar: account + conversation list -->
+      <!-- Sidebar -->
       <div class="chat-sidebar">
         <div class="chat-acct-bar">
-          <span style="font-size:12px;color:var(--t2);flex-shrink:0">Аккаунт:</span>
+          <label>Акк:</label>
           <select id="chat-acct-select" onchange="onChatAccountChange()"></select>
-          <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px" onclick="loadConversations()">↺</button>
+          <button class="chat-refresh-btn" onclick="loadConversations()" title="Обновить">↺</button>
         </div>
         <div class="chat-search">
           <input id="chat-search" type="text" placeholder="Поиск по имени..." oninput="filterConvs()">
         </div>
         <div class="conv-list" id="conv-list">
-          <div style="padding:20px;text-align:center;color:var(--t2);font-size:13px">Выберите аккаунт</div>
+          <div class="chat-empty">Выберите аккаунт</div>
         </div>
       </div>
 
-      <!-- Main: messages + compose -->
-      <div class="chat-main" id="chat-main">
+      <!-- Main -->
+      <div class="chat-main">
         <div class="chat-no-conv" id="chat-no-conv">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span>Выберите переписку</span>
         </div>
 
-        <div id="chat-thread" style="display:none;flex:1;flex-direction:column;min-height:0">
-          <div class="chat-header" id="chat-header">
-            <div class="conv-avatar" id="chat-header-avatar">👤</div>
+        <div class="chat-thread" id="chat-thread">
+          <div class="chat-header">
+            <div class="chat-hdr-avatar" id="chat-header-avatar">👤</div>
             <div>
               <div class="chat-header-name" id="chat-header-name"></div>
-              <div class="chat-header-sub" id="chat-header-sub"></div>
+              <div class="chat-header-sub"  id="chat-header-sub"></div>
             </div>
+            <button class="chat-hdr-reload" onclick="loadMessages(_chatPartnerId)" title="Обновить сообщения">↺</button>
           </div>
           <div class="chat-messages" id="chat-messages"></div>
           <div class="chat-compose">
@@ -528,7 +650,7 @@ input,select,textarea{font-family:inherit;outline:none}
               <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="onPhotosSelected(this)">
               <textarea class="compose-textarea" id="compose-text" rows="1" placeholder="Написать сообщение..."
                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"
-                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,200)+'px'"></textarea>
+                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,180)+'px'"></textarea>
               <button class="btn-chat-send" id="btn-chat-send" onclick="sendChatMessage()">➤</button>
             </div>
           </div>
@@ -541,19 +663,19 @@ input,select,textarea{font-family:inherit;outline:none}
   <div class="page" id="page-inbox">
     <div class="page-header">
       <div><div class="page-title">Входящие</div><div class="page-sub">Ответы продавцов и Phase 2</div></div>
-      <button class="btn btn-primary" id="btn-inbox" onclick="runInbox()">▶ Проверить входящие</button>
+      <button class="btn btn-primary" id="btn-inbox" onclick="runInbox()">▶ Проверить</button>
     </div>
     <div class="card" style="max-width:480px">
       <div class="card-head"><span class="card-title">Статистика</span></div>
       <div class="card-body">
         <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
-          <div><div class="stat-label">Отправлено</div><div class="stat-val" id="i-sent" style="font-size:22px">—</div></div>
-          <div><div class="stat-label">Ответили</div><div class="stat-val" id="i-replied" style="font-size:22px">—</div></div>
-          <div><div class="stat-label">Phase 2 отправлен</div><div class="stat-val" id="i-p2" style="font-size:22px">—</div></div>
+          <div><div class="stat-label">Отправлено</div><div class="stat-val" id="i-sent" style="font-size:24px">—</div></div>
+          <div><div class="stat-label">Ответили</div><div class="stat-val" id="i-replied" style="font-size:24px">—</div></div>
+          <div><div class="stat-label">Phase 2</div><div class="stat-val" id="i-p2" style="font-size:24px">—</div></div>
         </div>
       </div>
     </div>
-    <div class="card">
+    <div class="card" style="max-width:480px">
       <div class="card-head"><span class="card-title">Шаблон Phase 2</span></div>
       <div class="card-body">
         <div class="text-muted text-sm">Файл: <span class="mono">Shablon2.txt</span> · шаблонов: <span id="i-tpl2">—</span></div>
@@ -580,9 +702,7 @@ input,select,textarea{font-family:inherit;outline:none}
     <div class="card" style="max-width:520px">
       <div class="card-head">
         <span class="card-title">Статус</span>
-        <span class="status-badge" id="sched-badge" style="font-size:12px">
-          <span class="acct-dot"></span> Остановлен
-        </span>
+        <span class="status-badge status-unk" id="sched-badge"><span class="acct-dot"></span> Остановлен</span>
       </div>
       <div class="card-body">
         <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
@@ -597,14 +717,14 @@ input,select,textarea{font-family:inherit;outline:none}
         </div>
         <div class="btn-row">
           <button class="btn btn-primary" id="btn-sched-start" onclick="startScheduler()">▶ Запустить</button>
-          <button class="btn btn-danger" id="btn-sched-stop" onclick="stopScheduler()" disabled>■ Остановить</button>
+          <button class="btn btn-danger"  id="btn-sched-stop"  onclick="stopScheduler()" disabled>■ Остановить</button>
         </div>
       </div>
     </div>
     <div class="card" style="max-width:520px">
       <div class="card-head"><span class="card-title">Что делает планировщик</span></div>
       <div class="card-body">
-        <div class="text-muted" style="line-height:1.8;font-size:13px">
+        <div class="text-muted" style="line-height:2;font-size:13px">
           1. Парсит новые объявления<br>
           2. Отправляет сообщения новым продавцам<br>
           3. Проверяет входящие и отправляет Phase 2<br>
@@ -635,19 +755,19 @@ input,select,textarea{font-family:inherit;outline:none}
         <div class="section-label">Рассылка</div>
         <div class="form-grid">
           <div class="field">
-            <label>Задержка между сообщениями (сек)</label>
+            <label>Задержка (сек)</label>
             <input type="number" id="set-delay" min="0.5" max="60" step="0.5" value="2">
-            <div class="field-note">Пауза между отправками с одного аккаунта</div>
+            <div class="field-note">Пауза между отправками</div>
           </div>
           <div class="field">
-            <label>Сообщений с аккаунта за серию</label>
+            <label>Сообщений с аккаунта</label>
             <input type="number" id="set-per-account" min="1" max="20" value="2">
-            <div class="field-note">Каждый аккаунт шлёт N сообщений, затем кулдаун</div>
+            <div class="field-note">За одну серию</div>
           </div>
           <div class="field">
-            <label>Кулдаун между сериями (мин)</label>
+            <label>Кулдаун (мин)</label>
             <input type="number" id="set-cooldown" min="1" max="240" value="15">
-            <div class="field-note">Пауза перед следующей серией</div>
+            <div class="field-note">Пауза между сериями</div>
           </div>
         </div>
       </div>
@@ -659,17 +779,17 @@ input,select,textarea{font-family:inherit;outline:none}
             <input type="number" id="set-sched-interval" min="1" max="1440" value="15">
           </div>
           <div class="field">
-            <label>Сообщений за цикл планировщика</label>
+            <label>Сообщений за цикл</label>
             <input type="number" id="set-sched-per-run" min="1" max="50" value="2">
           </div>
         </div>
       </div>
       <div class="settings-section">
         <div class="section-label">Шаблоны</div>
-        <div class="text-muted text-sm" style="line-height:1.8">
+        <div class="text-muted text-sm" style="line-height:1.9">
           Phase 1: <span class="mono">Shablon.txt</span> — <span id="cfg-tpl1">—</span> шаблонов<br>
           Phase 2: <span class="mono">Shablon2.txt</span> — <span id="cfg-tpl2">—</span> шаблонов<br>
-          Разделитель между шаблонами: <span class="mono">---</span>
+          Разделитель: <span class="mono">---</span>
         </div>
       </div>
     </div>
@@ -682,21 +802,20 @@ input,select,textarea{font-family:inherit;outline:none}
   <div class="log-drawer-head">
     <span class="log-drawer-title">Лог событий</span>
     <div class="log-drawer-actions">
-      <button class="log-drawer-btn" onclick="clearLog()" title="Очистить">✕ Очистить</button>
-      <button class="log-drawer-btn" onclick="hideDrawer()" title="Свернуть">▼ Свернуть</button>
+      <button class="log-drawer-btn" onclick="clearLog()">✕ Очистить</button>
+      <button class="log-drawer-btn" onclick="hideDrawer()">▼ Свернуть</button>
     </div>
   </div>
   <div class="log-drawer-entries" id="log-entries"></div>
 </div>
 
-<!-- ── Toast container ── -->
+<!-- ── Toast ── -->
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
 // ── State ──
 let logs = [];
 let hideTimer = null;
-let drawerPinned = false;
 let ws = null;
 
 // ── Navigation ──
@@ -707,6 +826,10 @@ function goPage(name) {
   if (pg) pg.classList.add('active');
   const link = document.querySelector(`.topnav a[data-page="${name}"]`);
   if (link) link.classList.add('active');
+  // chat needs full-height layout — remove content padding
+  document.getElementById('main-content').classList.toggle('chat-mode', name === 'chat');
+  // log drawer hides when entering chat (covers compose)
+  if (name === 'chat') hideDrawer();
   onPageEnter(name);
 }
 document.querySelectorAll('.topnav a').forEach(a => {
@@ -724,8 +847,8 @@ function onPageEnter(name) {
 }
 
 // ── API helpers ──
-async function api(path, method='GET', body) {
-  const opts = { method, headers: {'Content-Type':'application/json'} };
+async function api(path, method = 'GET', body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(path, opts);
   return r.json();
@@ -735,31 +858,31 @@ function apiPost(path, body) { return api(path, 'POST', body); }
 // ── WebSocket ──
 function connectWS() {
   ws = new WebSocket(`ws://${location.host}/ws/logs`);
-  ws.onopen  = () => { setDot('on'); setLabel('Готов'); };
-  ws.onclose = () => { setDot(''); setLabel('Нет связи'); setTimeout(connectWS, 2000); };
-  ws.onerror = () => ws.close();
+  ws.onopen    = () => { setDot('on'); setLabel('Готов') };
+  ws.onclose   = () => { setDot(''); setLabel('Нет связи'); setTimeout(connectWS, 2000) };
+  ws.onerror   = () => ws.close();
   ws.onmessage = e => {
     const msg = JSON.parse(e.data);
-    if (msg.type === 'log')          handleLog(msg);
-    if (msg.type === 'task')         handleTask(msg);
-    if (msg.type === 'stats_refresh')   loadStats();
-    if (msg.type === 'scheduler')       updateSchedBadge(msg.running);
-    if (msg.type === 'sender_status')   updateSenderStatus(msg.running, msg.cycle);
+    if (msg.type === 'log')              handleLog(msg);
+    if (msg.type === 'task')             handleTask(msg);
+    if (msg.type === 'stats_refresh')    loadStats();
+    if (msg.type === 'scheduler')        updateSchedBadge(msg.running);
+    if (msg.type === 'sender_status')    updateSenderStatus(msg.running, msg.cycle);
     if (msg.type === 'sender_countdown') startCountdown(msg.seconds, msg.next_cycle);
   };
 }
 function setDot(cls) {
   const d = document.getElementById('ws-dot');
-  d.className = 'ws-dot' + (cls ? ' '+cls : '');
+  d.className = 'ws-dot' + (cls ? ' ' + cls : '');
 }
-function setLabel(t) { document.getElementById('task-label').textContent = t; }
+function setLabel(t) { document.getElementById('task-label').textContent = t }
 
 // ── Task updates ──
 function handleTask(msg) {
   const busy = msg.running;
   setDot(busy ? 'busy' : 'on');
   setLabel(busy ? (msg.label || 'Выполняется...') : 'Готов');
-  ['btn-parse','btn-inbox'].forEach(id => {
+  ['btn-parse', 'btn-inbox'].forEach(id => {
     const b = document.getElementById(id);
     if (b) b.disabled = busy;
   });
@@ -767,16 +890,17 @@ function handleTask(msg) {
 
 // ── Log handling ──
 function handleLog(msg) {
-  const entry = { time: msg.time || now(), level: msg.level || 'info', text: msg.text };
+  const entry = { time: msg.time || nowStr(), level: msg.level || 'info', text: msg.text };
   logs.push(entry);
   if (logs.length > 500) logs.shift();
   renderLog(entry);
   renderDashActivity();
-  showDrawer();
+  // don't show drawer if chat is active
+  const chatActive = document.getElementById('page-chat').classList.contains('active');
+  if (!chatActive) showDrawer();
 }
-function now() {
-  return new Date().toTimeString().slice(0,8);
-}
+function nowStr() { return new Date().toTimeString().slice(0, 8) }
+
 function renderLog(entry) {
   const wrap = document.getElementById('log-entries');
   const el = document.createElement('div');
@@ -789,7 +913,7 @@ function renderDashActivity() {
   const el = document.getElementById('dash-activity');
   if (!el) return;
   const slice = logs.slice(-12).reverse();
-  if (!slice.length) { el.innerHTML = '<div class="tbl-empty text-muted text-sm">Событий пока нет</div>'; return; }
+  if (!slice.length) { el.innerHTML = '<div class="tbl-empty text-muted">Событий пока нет</div>'; return; }
   el.innerHTML = slice.map(e =>
     `<div class="activity-item">
       <span class="activity-time">${e.time}</span>
@@ -804,17 +928,14 @@ function clearLog() {
   hideDrawer();
 }
 function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // ── Log Drawer ──
 function showDrawer() {
-  const d = document.getElementById('log-drawer');
-  d.classList.add('show');
+  document.getElementById('log-drawer').classList.add('show');
   clearTimeout(hideTimer);
-  if (!drawerPinned) {
-    hideTimer = setTimeout(hideDrawer, 8000);
-  }
+  hideTimer = setTimeout(hideDrawer, 9000);
 }
 function hideDrawer() {
   clearTimeout(hideTimer);
@@ -825,11 +946,11 @@ function hideDrawer() {
 async function loadStats() {
   try {
     const s = await api('/api/stats');
+    const inQ = (s.total_sellers || 0) - (s.messaged || 0);
     setText('st-listings', s.total_listings ?? '—');
     setText('st-sellers',  s.total_sellers  ?? '—');
     setText('st-sent',     s.messaged        ?? '—');
     setText('st-replied',  s.replied         ?? '—');
-    const inQ = (s.total_sellers || 0) - (s.messaged || 0);
     setText('st-queue-sub', `в очереди: ${inQ}`);
     setText('p-listings', s.total_listings ?? '—');
     setText('p-sellers',  s.total_sellers  ?? '—');
@@ -841,10 +962,7 @@ async function loadStats() {
     setText('i-p2',       s.phase2_sent     ?? '—');
   } catch {}
 }
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-}
+function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val }
 
 // ── Templates ──
 async function loadTemplates() {
@@ -857,7 +975,7 @@ async function loadTemplates() {
   } catch {}
 }
 
-// ── Account count for parser page ──
+// ── Account count ──
 async function loadAccountCount() {
   try {
     const r = await api('/api/accounts');
@@ -868,7 +986,7 @@ async function loadAccountCount() {
 
 // ── Queue ──
 async function loadQueue() {
-  const tbody = document.getElementById('queue-tbody');
+  const tbody  = document.getElementById('queue-tbody');
   const countEl = document.getElementById('queue-count');
   try {
     const rows = await api('/api/queue');
@@ -881,9 +999,9 @@ async function loadQueue() {
     tbody.innerHTML = rows.map(r => `
       <tr>
         <td>${esc(r.seller_name)}</td>
-        <td>${r.url ? `<a href="${esc(r.url)}" target="_blank" style="color:var(--bl)">${esc(r.title||'—')}</a>` : esc(r.title||'—')}</td>
-        <td>${esc(r.price||'—')}</td>
-        <td>${esc(r.category||'—')}</td>
+        <td>${r.url ? `<a href="${esc(r.url)}" target="_blank" style="color:var(--bl)">${esc(r.title || '—')}</a>` : esc(r.title || '—')}</td>
+        <td>${esc(r.price    || '—')}</td>
+        <td>${esc(r.category || '—')}</td>
       </tr>`).join('');
   } catch {
     tbody.innerHTML = '<tr><td colspan="4" class="tbl-empty">Ошибка загрузки</td></tr>';
@@ -905,7 +1023,7 @@ async function loadAccountCards() {
           <div class="acct-avatar">👤</div>
           <div style="flex:1;min-width:0">
             <div class="acct-name">${esc(a.name)}</div>
-            <div style="margin-top:4px">
+            <div style="margin-top:5px">
               <span class="status-badge ${a.has_token ? 'status-unk' : 'status-err'}" id="badge-${CSS.escape(a.name)}">
                 <span class="acct-dot"></span>
                 ${a.has_token ? 'Токен найден' : 'Нет токена'}
@@ -921,14 +1039,11 @@ async function loadAccountCards() {
 
 async function checkAccounts() {
   const btn = document.getElementById('btn-check-accts');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Проверка...'; }
-
-  // Set all to "checking"
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Проверка...' }
   document.querySelectorAll('[id^="badge-"]').forEach(el => {
     el.className = 'status-badge status-chk';
     el.innerHTML = '<span class="acct-dot"></span> Проверяется...';
   });
-
   try {
     const results = await apiPost('/api/accounts/check');
     for (const [name, status] of Object.entries(results)) {
@@ -952,7 +1067,7 @@ async function checkAccounts() {
   } catch {
     toast('Ошибка при проверке аккаунтов', 'err');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '▶ Проверить все'; }
+    if (btn) { btn.disabled = false; btn.textContent = '▶ Проверить все' }
   }
 }
 
@@ -960,15 +1075,15 @@ async function checkAccounts() {
 async function loadSettings() {
   try {
     const s = await api('/api/settings');
-    setVal('set-hours',         s.hours             ?? 72);
-    setVal('set-delay',         s.delay             ?? 2);
-    setVal('set-per-account',   s.per_account       ?? 2);
-    setVal('set-cooldown',      s.cooldown_min      ?? 15);
-    setVal('set-sched-interval',s.scheduler_interval ?? 15);
-    setVal('set-sched-per-run', s.scheduler_per_run ?? 2);
-    setVal('sched-interval',    s.scheduler_interval ?? 15);
-    setVal('sched-per-run',     s.scheduler_per_run ?? 2);
-    setVal('parser-hours',      s.hours             ?? 72);
+    setVal('set-hours',          s.hours              ?? 72);
+    setVal('set-delay',          s.delay              ?? 2);
+    setVal('set-per-account',    s.per_account        ?? 2);
+    setVal('set-cooldown',       s.cooldown_min       ?? 15);
+    setVal('set-sched-interval', s.scheduler_interval ?? 15);
+    setVal('set-sched-per-run',  s.scheduler_per_run  ?? 2);
+    setVal('sched-interval',     s.scheduler_interval ?? 15);
+    setVal('sched-per-run',      s.scheduler_per_run  ?? 2);
+    setVal('parser-hours',       s.hours              ?? 72);
     loadTemplates();
   } catch {}
 }
@@ -988,21 +1103,20 @@ async function saveSettings() {
     toast('Ошибка сохранения', 'err');
   }
 }
-function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v; }
-function intVal(id)   { return parseInt(document.getElementById(id)?.value || '0'); }
-function floatVal(id) { return parseFloat(document.getElementById(id)?.value || '0'); }
+function setVal(id, v)    { const el = document.getElementById(id); if (el) el.value = v }
+function intVal(id)       { return parseInt(document.getElementById(id)?.value || '0') }
+function floatVal(id)     { return parseFloat(document.getElementById(id)?.value || '0') }
 
 // ══════════════════════════════════════════
 // ── CHAT ──
 // ══════════════════════════════════════════
-let _chatAccount  = '';
+let _chatAccount   = '';
 let _chatPartnerId = null;
 let _chatMyId      = null;
 let _allConvs      = [];
 let _photoFiles    = [];
 
 async function initChat() {
-  // Wire up conv-list click once
   const convList = document.getElementById('conv-list');
   if (!convList._chatWired) {
     convList._chatWired = true;
@@ -1018,11 +1132,11 @@ async function initChat() {
     sel.innerHTML = r.accounts.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join('');
     _chatAccount = r.accounts[0] || '';
     if (_chatAccount) await loadConversations();
-  } catch(e) { console.error(e); }
+  } catch(e) { console.error('initChat:', e) }
 }
 
 async function onChatAccountChange() {
-  _chatAccount = document.getElementById('chat-acct-select').value;
+  _chatAccount   = document.getElementById('chat-acct-select').value;
   _chatPartnerId = null;
   showNoConv();
   await loadConversations();
@@ -1030,13 +1144,13 @@ async function onChatAccountChange() {
 
 async function loadConversations() {
   if (!_chatAccount) return;
-  document.getElementById('conv-list').innerHTML = '<div style="padding:20px;text-align:center;color:var(--t2);font-size:13px"><span class="spinner" style="display:inline-block"></span></div>';
+  document.getElementById('conv-list').innerHTML = '<div class="chat-empty"><span class="spinner"></span></div>';
   try {
     const r = await api(`/api/chat/conversations?account=${encodeURIComponent(_chatAccount)}`);
     _allConvs = r.conversations || [];
     renderConvList(_allConvs);
-  } catch(e) {
-    document.getElementById('conv-list').innerHTML = '<div style="padding:20px;text-align:center;color:var(--err);font-size:13px">Ошибка загрузки</div>';
+  } catch {
+    document.getElementById('conv-list').innerHTML = '<div class="chat-empty" style="color:var(--rd)">Ошибка загрузки</div>';
   }
 }
 
@@ -1044,36 +1158,41 @@ function filterConvs() {
   const q = document.getElementById('chat-search').value.toLowerCase();
   renderConvList(q ? _allConvs.filter(c => {
     const u = c._linkedUser || {};
-    const name = `${u.firstname||''} ${u.lastname||''}`.toLowerCase();
-    return name.includes(q);
+    const n = `${u.firstname || ''} ${u.lastname || ''} ${u.name || ''}`.toLowerCase();
+    return n.includes(q);
   }) : _allConvs);
 }
 
+function convName(c) {
+  const u = c._linkedUser || {};
+  const full = `${u.firstname || ''} ${u.lastname || ''}`.trim();
+  return full || u.name || `Собеседник ${c.partner_id}`;
+}
+
 function renderConvList(convs) {
-  // Build partner_id → linked_user map from last seen messages call (not available here, use conv data)
   const list = document.getElementById('conv-list');
   if (!convs.length) {
-    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t2);font-size:13px">Нет переписок</div>';
+    list.innerHTML = '<div class="chat-empty">Нет переписок</div>';
     return;
   }
   list.innerHTML = convs.map(c => {
-    const u = c._linkedUser || {};
-    const pid = c.partner_id;
+    const pid     = c.partner_id;
+    const u       = c._linkedUser || {};
+    const name    = convName(c);
+    const avatar  = u.photo_thumb_url || u.photo_url || '';
     const lastMsg = c.last_private_conversation_message || {};
-    const name = u.name || u.firstname ? `${u.firstname||''} ${u.lastname||''}`.trim() : `Собеседник ${pid}`;
-    const avatar = u.photo_thumb_url || u.photo_url;
-    const avatarHtml = avatar
+    const lastTxt = lastMsg.body ? lastMsg.body.slice(0, 52) + (lastMsg.body.length > 52 ? '…' : '') : '';
+    const time    = lastMsg.created_at ? fmtTime(lastMsg.created_at) : '';
+    const unread  = c.unseen ? '<span class="conv-unread">!</span>' : '';
+    const active  = pid == _chatPartnerId ? ' active' : '';
+    const avHtml  = avatar
       ? `<div class="conv-avatar"><img src="${esc(avatar)}" alt=""></div>`
       : `<div class="conv-avatar">👤</div>`;
-    const lastText = lastMsg.body ? lastMsg.body.slice(0, 55) + (lastMsg.body.length > 55 ? '…' : '') : '';
-    const time = lastMsg.created_at ? fmtTime(lastMsg.created_at) : '';
-    const unread = c.unseen ? '<span class="conv-unread">!</span>' : '';
-    const active = pid == _chatPartnerId ? ' active' : '';
-    return `<div class="conv-item${active}" data-pid="${pid}" data-name="${esc(name)}" data-avatar="${esc(avatar||'')}">
-      ${avatarHtml}
+    return `<div class="conv-item${active}" data-pid="${pid}" data-name="${esc(name)}" data-avatar="${esc(avatar)}">
+      ${avHtml}
       <div class="conv-info">
         <div class="conv-name">${esc(name)}</div>
-        <div class="conv-last">${esc(lastText)}</div>
+        <div class="conv-last">${esc(lastTxt)}</div>
       </div>
       <div class="conv-meta">
         <span class="conv-time">${esc(time)}</span>
@@ -1087,95 +1206,100 @@ async function openConv(partnerId, name, avatarUrl) {
   _chatPartnerId = partnerId;
   document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
   document.querySelector(`.conv-item[data-pid="${partnerId}"]`)?.classList.add('active');
-
-  // Show thread panel
-  document.getElementById('chat-no-conv').style.display  = 'none';
-  const thread = document.getElementById('chat-thread');
-  thread.style.display = 'flex';
-
-  // Header
-  const hdrName = document.getElementById('chat-header-name');
-  const hdrSub  = document.getElementById('chat-header-sub');
-  const hdrAv   = document.getElementById('chat-header-avatar');
-  hdrName.textContent = name;
-  hdrSub.textContent  = `partner_id: ${partnerId}`;
-  if (avatarUrl) hdrAv.innerHTML = `<img src="${esc(avatarUrl)}" alt="">`;
-  else hdrAv.textContent = '👤';
-
-  // Load messages
+  showThread(name, avatarUrl, partnerId);
   await loadMessages(partnerId);
 }
 
+function showThread(name, avatarUrl, partnerId) {
+  document.getElementById('chat-no-conv').style.display = 'none';
+  const thread = document.getElementById('chat-thread');
+  thread.classList.add('open');
+  document.getElementById('chat-header-name').textContent = name;
+  document.getElementById('chat-header-sub').textContent  = `partner_id: ${partnerId}`;
+  const av = document.getElementById('chat-header-avatar');
+  av.innerHTML = avatarUrl ? `<img src="${esc(avatarUrl)}" alt="">` : '👤';
+}
+
+function showNoConv() {
+  document.getElementById('chat-no-conv').style.display = '';
+  document.getElementById('chat-thread').classList.remove('open');
+}
+
 async function loadMessages(partnerId) {
+  if (!partnerId) return;
   const box = document.getElementById('chat-messages');
-  box.innerHTML = '<div class="chat-empty"><span class="spinner" style="display:inline-block"></span></div>';
+  box.innerHTML = '<div class="chat-empty"><span class="spinner"></span></div>';
   try {
     const r = await api(`/api/chat/messages?account=${encodeURIComponent(_chatAccount)}&partner_id=${partnerId}`);
     _chatMyId = r.my_id;
-    const msgs = r.private_conversation_messages || [];
+    const msgs  = r.private_conversation_messages || [];
     const users = {};
     for (const u of (r.linked_users || [])) users[u.id] = u;
 
-    // Enrich conversation list with user names
+    // Enrich names in sidebar
     const conv = _allConvs.find(c => c.partner_id == partnerId);
     if (conv && users[partnerId]) {
       conv._linkedUser = users[partnerId];
       renderConvList(_allConvs);
       document.querySelector(`.conv-item[data-pid="${partnerId}"]`)?.classList.add('active');
+      // also update header name
+      const newName = convName(conv);
+      document.getElementById('chat-header-name').textContent = newName;
     }
 
     if (!msgs.length) {
       box.innerHTML = '<div class="chat-empty">Нет сообщений</div>';
       return;
     }
-
     box.innerHTML = msgs.map(m => renderMessage(m, users)).join('');
     box.scrollTop = box.scrollHeight;
   } catch(e) {
-    box.innerHTML = '<div class="chat-empty" style="color:var(--err)">Ошибка загрузки</div>';
+    box.innerHTML = '<div class="chat-empty" style="color:var(--rd)">Ошибка загрузки</div>';
+    console.error('loadMessages:', e);
   }
 }
 
 function renderMessage(m, users) {
-  const isMe = m.sender_id == _chatMyId;
-  const sender = users[m.sender_id] || {};
-  const avatarUrl = sender.photo_thumb_url || sender.photo_url || '';
-  const avatarHtml = avatarUrl
-    ? `<img class="msg-avatar" src="${esc(avatarUrl)}" alt="">`
-    : `<div class="msg-avatar" style="display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--t2)">${isMe ? '🤖' : '👤'}</div>`;
+  const isMe    = m.sender_id == _chatMyId;
+  const sender  = users[m.sender_id] || {};
+  const avUrl   = sender.photo_thumb_url || sender.photo_url || '';
+  const avHtml  = avUrl
+    ? `<img class="msg-avatar" src="${esc(avUrl)}" alt="">`
+    : `<div class="msg-avatar" style="display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--t2)">${isMe ? '🤖' : '👤'}</div>`;
 
-  // Build embeddable preview (linked listing)
+  // Embeddable listing preview
   let embedHtml = '';
   for (const emb of (m.embeddables || [])) {
-    const meta = emb.meta || {};
-    const imgs = (meta.images || []).slice(0, 4);
-    const imgRow = imgs.length ? `<div class="msg-embed-imgs">${imgs.map(i => `<img src="${esc(i.url||i.url_medium||i.original_url)}" alt="" onclick="window.open('${esc(i.original_url)}','_blank')">`).join('')}</div>` : '';
+    const meta  = emb.meta || {};
+    const imgs  = (meta.images || []).slice(0, 4);
+    const imgRow = imgs.length
+      ? `<div class="msg-embed-imgs">${imgs.map(i => `<img src="${esc(i.url || i.url_medium || i.original_url)}" alt="" onclick="window.open('${esc(i.original_url || i.url)}','_blank')">`).join('')}</div>`
+      : '';
     embedHtml += `<div class="msg-embed">
       ${imgRow}
-      <div class="msg-embed-body">${esc(meta.subject||'')}</div>
-      ${meta.body ? `<div class="msg-embed-desc">${esc(meta.body.slice(0,120))}…</div>` : ''}
+      <div class="msg-embed-body">${esc(meta.subject || '')}</div>
+      ${meta.body ? `<div class="msg-embed-desc">${esc(meta.body.slice(0, 120))}…</div>` : ''}
     </div>`;
   }
 
-  // Message images
+  // Image attachments
   let imgsHtml = '';
   if ((m.images || []).length) {
     imgsHtml = `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">` +
-      m.images.map(i => `<img src="${esc(i.url||i.url_medium)}" style="max-width:200px;border-radius:8px;cursor:pointer" onclick="window.open('${esc(i.original_url||i.url)}','_blank')">`).join('') +
+      m.images.map(i => `<img src="${esc(i.url || i.url_medium)}" style="max-width:200px;border-radius:8px;cursor:pointer" onclick="window.open('${esc(i.original_url || i.url)}','_blank')">`).join('') +
       `</div>`;
   }
 
-  const time = m.created_at ? fmtTime(m.created_at) : '';
+  const time   = m.created_at ? fmtTime(m.created_at) : '';
+  const body   = m.body || '';
   const rowCls = isMe ? 'msg-row me' : 'msg-row';
-  const msgId = `msg-${m.id || Math.random().toString(36).slice(2)}`;
-  const body = m.body || '';
 
-  return `<div class="${rowCls}" id="${msgId}">
-    ${avatarHtml}
-    <div>
+  return `<div class="${rowCls}">
+    ${avHtml}
+    <div class="msg-body-wrap">
       <div class="msg-bubble">${esc(body)}${embedHtml}${imgsHtml}</div>
-      <div class="msg-time">
-        <span>${esc(time)}</span>
+      <div class="msg-meta">
+        <span class="msg-time">${esc(time)}</span>
         ${body ? `<button class="msg-translate-btn" data-text="${esc(body)}" onclick="translateMsg(this)">🌐 RU</button>` : ''}
       </div>
     </div>
@@ -1197,26 +1321,20 @@ async function translateMsg(btn) {
     const d = await r.json();
     if (d.translated) {
       const div = document.createElement('div');
-      div.className = 'msg-translation';
+      div.className   = 'msg-translation';
       div.textContent = d.translated;
       bubble.appendChild(div);
       btn.textContent = '✕ RU';
     } else {
       btn.textContent = '🌐 RU';
     }
-  } catch(e) {
+  } catch {
     btn.textContent = '🌐 RU';
   }
   btn.disabled = false;
 }
 
-function showNoConv() {
-  document.getElementById('chat-no-conv').style.display  = 'flex';
-  document.getElementById('chat-thread').style.display   = 'none';
-}
-
 // Photo attachments
-let _photoPreviews = [];
 function onPhotosSelected(input) {
   _photoFiles = [..._photoFiles, ...input.files];
   renderPhotoPreviews();
@@ -1226,7 +1344,7 @@ function renderPhotoPreviews() {
   const box = document.getElementById('compose-photos');
   if (!_photoFiles.length) { box.style.display = 'none'; return; }
   box.style.display = 'flex';
-  box.innerHTML = _photoFiles.map((f,i) => {
+  box.innerHTML = _photoFiles.map((f, i) => {
     const url = URL.createObjectURL(f);
     return `<div class="compose-photo-preview">
       <img src="${url}" alt="">
@@ -1234,35 +1352,31 @@ function renderPhotoPreviews() {
     </div>`;
   }).join('');
 }
-function removePhoto(i) {
-  _photoFiles.splice(i, 1);
-  renderPhotoPreviews();
-}
+function removePhoto(i) { _photoFiles.splice(i, 1); renderPhotoPreviews() }
 
 async function sendChatMessage() {
   if (!_chatPartnerId || !_chatAccount) return;
-  const ta = document.getElementById('compose-text');
+  const ta   = document.getElementById('compose-text');
   const text = ta.value.trim();
   if (!text && !_photoFiles.length) return;
 
   const btn = document.getElementById('btn-chat-send');
-  btn.disabled = true;
+  btn.disabled    = true;
   btn.textContent = '…';
 
+  const hasPhotos = _photoFiles.length > 0;
   try {
-    let r, fd;
-    if (_photoFiles.length) {
-      // Photos → multipart, Playwright attaches files in browser
-      fd = new FormData();
+    let r;
+    if (hasPhotos) {
+      const fd = new FormData();
       fd.append('account',    _chatAccount);
       fd.append('partner_id', String(_chatPartnerId));
       fd.append('text',       text);
       for (const f of _photoFiles) fd.append('photos', f);
-      const resp = await fetch('/api/chat/send-photo', {method: 'POST', body: fd});
+      const resp = await fetch('/api/chat/send-photo', { method: 'POST', body: fd });
       r = await resp.json();
     } else {
-      // Text only → direct API, instant
-      r = await apiPost('/api/chat/send', {account: _chatAccount, partner_id: _chatPartnerId, text});
+      r = await apiPost('/api/chat/send', { account: _chatAccount, partner_id: _chatPartnerId, text });
     }
     if (r.ok) {
       ta.value = '';
@@ -1270,27 +1384,25 @@ async function sendChatMessage() {
       _photoFiles = [];
       renderPhotoPreviews();
       toast('Отправлено', 'ok');
-      const hasPhotos = !!fd;
-      setTimeout(() => loadMessages(_chatPartnerId), hasPhotos ? 3000 : 1500);
+      setTimeout(() => loadMessages(_chatPartnerId), hasPhotos ? 3500 : 1500);
     } else {
       toast('Ошибка отправки', 'err');
     }
-  } catch(e) {
+  } catch {
     toast('Ошибка отправки', 'err');
   } finally {
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = '➤';
   }
 }
 
 function fmtTime(iso) {
-  const d = new Date(iso);
-  const now = new Date();
-  const diff = now - d;
-  if (diff < 60000)   return 'сейчас';
-  if (diff < 3600000) return `${Math.floor(diff/60000)} мин`;
-  if (diff < 86400000) return d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'});
-  return d.toLocaleDateString('ru', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const d    = new Date(iso);
+  const diff = Date.now() - d;
+  if (diff < 60000)    return 'сейчас';
+  if (diff < 3600000)  return `${Math.floor(diff / 60000)} мин`;
+  if (diff < 86400000) return d.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('ru', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
 // ── Actions ──
@@ -1299,7 +1411,7 @@ async function runParser() {
   await apiPost('/api/settings', { hours });
   try {
     await apiPost('/api/parser/run');
-  } catch (e) {
+  } catch {
     toast('Ошибка запуска парсера', 'err');
   }
 }
@@ -1325,13 +1437,13 @@ function updateSenderStatus(running, cycle) {
   const label = document.getElementById('sender-cycle-label');
   if (start) start.disabled = running;
   if (stop)  stop.disabled  = !running;
-  if (bar)   bar.style.display = running ? 'flex' : 'none';
+  if (bar)   bar.classList.toggle('visible', running);
   if (label && cycle) label.textContent = `Цикл #${cycle}`;
-  if (!running) { clearCountdown(); if (label) label.textContent = ''; }
+  if (!running) { clearCountdown(); if (label) label.textContent = '' }
 }
 let _countdownTimer = null;
 function clearCountdown() {
-  if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null; }
+  if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null }
   const el = document.getElementById('sender-countdown');
   if (el) el.textContent = '';
 }
@@ -1340,10 +1452,10 @@ function startCountdown(seconds, nextCycle) {
   let rem = seconds;
   const el    = document.getElementById('sender-countdown');
   const label = document.getElementById('sender-cycle-label');
-  const tick = () => {
-    if (rem <= 0) { clearCountdown(); return; }
+  const tick  = () => {
+    if (rem <= 0) { clearCountdown(); return }
     const m = Math.floor(rem / 60), s = rem % 60;
-    if (el)    el.textContent = `следующий цикл #${nextCycle} через ${m}:${String(s).padStart(2,'0')}`;
+    if (el)    el.textContent = `след. цикл #${nextCycle} через ${m}:${String(s).padStart(2, '0')}`;
     if (label) label.textContent = 'Ожидание';
     rem--;
   };
@@ -1395,20 +1507,20 @@ async function startScheduler() {
   try {
     await apiPost('/api/scheduler/start');
     toast('Планировщик запущен', 'ok');
-  } catch { toast('Ошибка запуска', 'err'); }
+  } catch { toast('Ошибка запуска', 'err') }
 }
 async function stopScheduler() {
   try {
     await apiPost('/api/scheduler/stop');
     toast('Планировщик остановлен', 'ok');
-  } catch { toast('Ошибка', 'err'); }
+  } catch { toast('Ошибка', 'err') }
 }
 
 // ── Toast ──
-function toast(msg, type='ok') {
+function toast(msg, type = 'ok') {
   const wrap = document.getElementById('toast-wrap');
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
+  const el   = document.createElement('div');
+  el.className   = `toast ${type}`;
   el.textContent = msg;
   wrap.appendChild(el);
   setTimeout(() => el.remove(), 3500);
