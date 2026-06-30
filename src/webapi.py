@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,7 +16,7 @@ from src.db import init_db, upsert_listing, is_seller_new, get_stats
 from src.parser import parse_listings
 from src.sender import send_messages
 from src.inbox import check_and_reply
-from src.chat import get_token, fetch_conversations, fetch_messages, fetch_profile, send_message
+from src.chat import get_token, fetch_conversations, fetch_messages, fetch_profile, send_message, send_with_photos
 
 
 # ─── State ────────────────────────────────────────────────────────────────────
@@ -586,6 +586,37 @@ async def api_chat_messages(account: str, partner_id: int, per_page: int = 50):
     profile = await fetch_profile(token)
     result["my_id"] = profile.get("id")
     return result
+
+
+@app.post("/api/chat/send-photo")
+async def api_chat_send_photo(
+    account:    str        = Form(...),
+    partner_id: int        = Form(...),
+    text:       str        = Form(""),
+    photos:     list[UploadFile] = File(default=[]),
+):
+    storage = _account_state(account)
+    if not storage:
+        return JSONResponse({"error": "Аккаунт не найден"}, status_code=404)
+    tmp_paths: list[str] = []
+    try:
+        for photo in photos:
+            suffix = os.path.splitext(photo.filename or "")[1] or ".jpg"
+            tmp = os.path.join(
+                os.environ.get("TEMP", "/tmp"),
+                f"nebena_photo_{os.getpid()}_{len(tmp_paths)}{suffix}",
+            )
+            with open(tmp, "wb") as f:
+                f.write(await photo.read())
+            tmp_paths.append(tmp)
+        ok = await send_with_photos(storage, partner_id, text, tmp_paths)
+    finally:
+        for p in tmp_paths:
+            try:
+                os.unlink(p)
+            except OSError:
+                pass
+    return {"ok": ok}
 
 
 @app.post("/api/chat/send")

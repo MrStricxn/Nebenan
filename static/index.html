@@ -1242,26 +1242,35 @@ async function sendChatMessage() {
   if (!_chatPartnerId || !_chatAccount) return;
   const ta = document.getElementById('compose-text');
   const text = ta.value.trim();
-  if (!text) return;
+  if (!text && !_photoFiles.length) return;
 
   const btn = document.getElementById('btn-chat-send');
   btn.disabled = true;
   btn.textContent = '…';
 
   try {
-    const r = await apiPost('/api/chat/send', {
-      account:    _chatAccount,
-      partner_id: _chatPartnerId,
-      text,
-    });
+    let r, fd;
+    if (_photoFiles.length) {
+      // Photos → multipart, Playwright attaches files in browser
+      fd = new FormData();
+      fd.append('account',    _chatAccount);
+      fd.append('partner_id', String(_chatPartnerId));
+      fd.append('text',       text);
+      for (const f of _photoFiles) fd.append('photos', f);
+      const resp = await fetch('/api/chat/send-photo', {method: 'POST', body: fd});
+      r = await resp.json();
+    } else {
+      // Text only → direct API, instant
+      r = await apiPost('/api/chat/send', {account: _chatAccount, partner_id: _chatPartnerId, text});
+    }
     if (r.ok) {
       ta.value = '';
       ta.style.height = 'auto';
       _photoFiles = [];
       renderPhotoPreviews();
       toast('Отправлено', 'ok');
-      // Reload messages
-      setTimeout(() => loadMessages(_chatPartnerId), 1500);
+      const hasPhotos = !!fd;
+      setTimeout(() => loadMessages(_chatPartnerId), hasPhotos ? 3000 : 1500);
     } else {
       toast('Ошибка отправки', 'err');
     }

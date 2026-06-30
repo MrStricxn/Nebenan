@@ -65,7 +65,7 @@ async def fetch_profile(token: str) -> dict:
 
 
 async def send_message(token: str, receiver_id: int, text: str) -> bool:
-    """Send via direct API POST — no browser needed."""
+    """Send text via direct API POST — no browser needed."""
     payload = {
         "private_conversation_message": {
             "body":        text,
@@ -82,3 +82,48 @@ async def send_message(token: str, receiver_id: int, text: str) -> bool:
     else:
         log.warning(f"send_message → {receiver_id}: FAILED")
     return ok
+
+
+_LAUNCH_ARGS = ["--disable-blink-features=AutomationControlled", "--no-sandbox", "--disable-dev-shm-usage"]
+_TA_SEL      = "textarea[data-testid='c-message_form-textfield']"
+_BTN_SEL     = "button[data-testid='c-message_form-submit']"
+_TRIGGER     = "el => { el.dispatchEvent(new Event('focus',{bubbles:true})); el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})) }"
+
+
+async def send_with_photos(storage_state: dict, receiver_id: int, text: str, photo_paths: list[str]) -> bool:
+    """Send a message with attached photos via Playwright browser."""
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=False, args=_LAUNCH_ARGS)
+        ctx = await browser.new_context(
+            storage_state=storage_state,
+            user_agent=_USER_AGENT,
+        )
+        page = await ctx.new_page()
+        try:
+            await page.goto(f"https://nebenan.de/messages/{receiver_id}", timeout=30000)
+            ta = page.locator(_TA_SEL)
+            await ta.wait_for(timeout=15000)
+
+            # Attach photos via the hidden file input in the compose form
+            file_input = page.locator("input[type='file']").first
+            try:
+                await file_input.set_input_files(photo_paths, timeout=5000)
+                await page.wait_for_timeout(1500)
+            except Exception as e:
+                log.warning(f"send_with_photos: file input not found ({e}), sending text only")
+
+            if text:
+                await ta.click()
+                await ta.fill(text)
+                await ta.evaluate(_TRIGGER)
+                await page.wait_for_timeout(500)
+
+            await page.locator(_BTN_SEL).click(timeout=8000)
+            await page.wait_for_timeout(1500)
+            log.info(f"send_with_photos → {receiver_id}: OK ({len(photo_paths)} фото)")
+            return True
+        except Exception as e:
+            log.error(f"send_with_photos({receiver_id}): {e}")
+            return False
+        finally:
+            await browser.close()
