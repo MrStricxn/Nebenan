@@ -717,6 +717,16 @@ select:focus { border-color: var(--accent); }
               <input type="number" id="set-delay" min="0.5" max="60" step="0.5" value="2">
             </div>
           </div>
+          <div class="form-row">
+            <div class="field">
+              <label class="label">Сообщений с аккаунта за серию</label>
+              <input type="number" id="set-per-account" min="1" max="20" value="2">
+            </div>
+            <div class="field">
+              <label class="label">Кулдаун между сериями (мин)</label>
+              <input type="number" id="set-cooldown" min="1" max="240" value="15">
+            </div>
+          </div>
           <div class="btn-row">
             <button class="btn btn-primary" onclick="saveSettings()">Сохранить настройки</button>
           </div>
@@ -899,12 +909,14 @@ async function loadStats() {
 async function loadSettings() {
   try {
     const s = await fetch('/api/settings').then(r => r.json());
-    document.getElementById('set-hours').value     = s.hours;
-    document.getElementById('set-delay').value     = s.delay;
-    document.getElementById('parser-hours').value  = s.hours;
-    document.getElementById('sender-delay').value  = s.delay;
-    document.getElementById('sched-interval').value = s.scheduler_interval;
-    document.getElementById('sched-per-run').value  = s.scheduler_per_run;
+    document.getElementById('set-hours').value       = s.hours;
+    document.getElementById('set-delay').value       = s.delay;
+    document.getElementById('set-per-account').value = s.per_account ?? 2;
+    document.getElementById('set-cooldown').value    = s.cooldown_min ?? 15;
+    document.getElementById('parser-hours').value    = s.hours;
+    document.getElementById('sender-delay').value    = s.delay;
+    document.getElementById('sched-interval').value  = s.scheduler_interval;
+    document.getElementById('sched-per-run').value   = s.scheduler_per_run;
   } catch {}
 }
 
@@ -912,6 +924,8 @@ async function saveSettings() {
   const body = {
     hours:              parseInt(document.getElementById('set-hours').value),
     delay:              parseFloat(document.getElementById('set-delay').value),
+    per_account:        parseInt(document.getElementById('set-per-account').value),
+    cooldown_min:       parseInt(document.getElementById('set-cooldown').value),
     scheduler_interval: parseInt(document.getElementById('sched-interval').value),
     scheduler_per_run:  parseInt(document.getElementById('sched-per-run').value),
   };

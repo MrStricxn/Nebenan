@@ -30,6 +30,8 @@ class AppState:
         "max_accounts": 0,
         "scheduler_interval": 15,
         "scheduler_per_run": 2,
+        "per_account": 2,       # messages per account per batch
+        "cooldown_min": 15,     # minutes between batches
     }
     scheduler_running: bool = False
     scheduler_task: asyncio.Task = None
@@ -226,10 +228,38 @@ async def _do_send(max_per_run: int = 0):
         if not sellers:
             await broadcaster.log("Нет новых продавцов — сначала запустите парсер", "warning")
             return
-        await broadcaster.log(f"В очереди {len(sellers)} продавцов, лимит: {max_per_run or 'без ограничений'}")
-        sent = await send_messages(sellers, state.pool, state.templates, state.conn,
-                                   delay=state.settings["delay"], max_per_run=max_per_run)
-        await broadcaster.log(f"Рассылка завершена: {sent} сообщений")
+
+        per_account  = state.settings["per_account"]
+        cooldown_min = state.settings["cooldown_min"]
+        batch_size   = state.pool.total * per_account  # e.g. 6 accounts × 2 = 12 per round
+        if max_per_run > 0:
+            sellers = sellers[:max_per_run]
+
+        total_sent = 0
+        round_num  = 0
+        queue      = list(sellers)
+
+        while queue:
+            round_num += 1
+            batch = queue[:batch_size]
+            queue = queue[batch_size:]
+
+            await broadcaster.log(
+                f"Серия #{round_num}: {len(batch)} сообщений "
+                f"({per_account} на аккаунт), осталось в очереди: {len(queue)}"
+            )
+            sent = await send_messages(batch, state.pool, state.templates, state.conn,
+                                       delay=state.settings["delay"])
+            total_sent += sent
+
+            if queue:
+                await broadcaster.log(
+                    f"Серия #{round_num} завершена ({sent} отправлено). "
+                    f"Кулдаун {cooldown_min} мин..."
+                )
+                await asyncio.sleep(cooldown_min * 60)
+
+        await broadcaster.log(f"Рассылка завершена: {total_sent} сообщений отправлено")
         await broadcaster.broadcast({"type": "stats_refresh"})
     except Exception as e:
         await broadcaster.log(f"Ошибка отправки: {e}", "error")
