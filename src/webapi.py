@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -36,6 +37,7 @@ class AppState:
     scheduler_running: bool = False
     scheduler_task: asyncio.Task = None
     task_running: bool = False
+    log_history: list = []          # persisted across reloads, max 500
 
 state = AppState()
 
@@ -65,7 +67,12 @@ class WSBroadcaster:
             self.disconnect(c)
 
     async def log(self, text: str, level: str = "info"):
-        await self.broadcast({"type": "log", "level": level, "text": text})
+        ts = datetime.now().strftime("%H:%M:%S")
+        entry = {"type": "log", "level": level, "text": text, "time": ts}
+        state.log_history.append(entry)
+        if len(state.log_history) > 500:
+            state.log_history.pop(0)
+        await self.broadcast(entry)
 
     async def task_update(self, running: bool, label: str = ""):
         await self.broadcast({"type": "task", "running": running, "label": label})
@@ -142,6 +149,12 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 @app.websocket("/ws/logs")
 async def ws_logs(websocket: WebSocket):
     await broadcaster.connect(websocket)
+    # Replay history so client sees logs from before this connection
+    for entry in state.log_history:
+        try:
+            await websocket.send_text(json.dumps(entry, ensure_ascii=False))
+        except Exception:
+            break
     try:
         while True:
             await websocket.receive_text()
@@ -158,8 +171,56 @@ async def api_stats():
 
 @app.get("/api/accounts")
 async def api_accounts():
-    names = list(state.pool._accounts.keys()) if state.pool else []
-    return {"accounts": names, "total": len(names)}
+    from src.parser import _get_auth_token
+    accounts = []
+    for name, storage in (state.pool._accounts.items() if state.pool else {}.items()):
+        token = _get_auth_token(storage)
+        accounts.append({"name": name, "has_token": bool(token)})
+    return {"accounts": accounts, "total": len(accounts)}
+
+
+@app.post("/api/accounts/check")
+async def api_accounts_check():
+    from src.parser import _get_auth_token
+    from playwright.async_api import async_playwright
+    results = {}
+    async with async_playwright() as pw:
+        for name, storage in (state.pool._accounts.items() if state.pool else {}.items()):
+            token = _get_auth_token(storage)
+            if not token:
+                results[name] = "no_token"
+                continue
+            try:
+                req_ctx = await pw.request.new_context(
+                    extra_http_headers={"x-auth-token": token, "accept": "application/json"}
+                )
+                r = await req_ctx.get(
+                    "https://api.nebenan.de/api/core/v3/profile/notification_counts",
+                    timeout=8000,
+                )
+                results[name] = "ok" if r.status == 200 else "expired"
+                await req_ctx.dispose()
+            except Exception:
+                results[name] = "error"
+    return results
+
+
+@app.get("/api/queue")
+async def api_queue():
+    async with state.conn.execute(
+        """
+        SELECT s.seller_id, s.seller_name, l.title, l.price, l.category, l.url
+        FROM sellers s
+        LEFT JOIN (SELECT seller_id, title, price, category, url FROM listings GROUP BY seller_id) l
+          ON s.seller_id = l.seller_id
+        WHERE s.message_sent = 0
+        ORDER BY s.first_seen_at DESC
+        LIMIT 200
+        """
+    ) as cur:
+        rows = await cur.fetchall()
+    return [{"seller_id": r[0], "seller_name": r[1], "title": r[2] or "",
+             "price": r[3] or "", "category": r[4] or "", "url": r[5] or ""} for r in rows]
 
 
 @app.get("/api/settings")
