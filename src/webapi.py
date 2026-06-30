@@ -2,6 +2,8 @@ import asyncio
 import json
 import logging
 import os
+import urllib.parse
+import urllib.request
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Optional
@@ -586,6 +588,27 @@ async def api_chat_messages(account: str, partner_id: int, per_page: int = 50):
     profile = await fetch_profile(token)
     result["my_id"] = profile.get("id")
     return result
+
+
+@app.get("/api/translate")
+async def api_translate(text: str, source: str = "de", target: str = "ru"):
+    def _call():
+        url = (
+            "https://api.mymemory.translated.net/get?"
+            + urllib.parse.urlencode({"q": text, "langpair": f"{source}|{target}"})
+        )
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            return json.loads(resp.read().decode())
+
+    try:
+        loop = asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, _call)
+        translated = data.get("responseData", {}).get("translatedText", "")
+        return {"translated": translated if translated != text else ""}
+    except Exception as e:
+        log.warning(f"translate error: {e}")
+        return JSONResponse({"translated": ""}, status_code=200)
 
 
 @app.post("/api/chat/send-photo")
