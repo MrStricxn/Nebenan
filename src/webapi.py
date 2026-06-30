@@ -387,7 +387,14 @@ async def _sender_loop():
     try:
         while not state.sender_stop_event.is_set():
             async with state.conn.execute(
-                "SELECT seller_id, seller_name, message_url FROM sellers WHERE message_sent = 0"
+                """
+                SELECT s.seller_id, s.seller_name, s.message_url,
+                       (SELECT l.url FROM listings l
+                        WHERE l.seller_id = s.seller_id AND l.url != ''
+                        ORDER BY l.parsed_at DESC LIMIT 1) AS listing_url
+                FROM sellers s
+                WHERE s.message_sent = 0
+                """
             ) as cur:
                 rows = await cur.fetchall()
 
@@ -400,8 +407,15 @@ async def _sender_loop():
                 break
 
             run += 1
-            batch = [{"seller_id": r[0], "seller_name": r[1], "message_url": r[2] or ""}
-                     for r in rows[:batch_size]]
+            batch = [
+                {
+                    "seller_id":   r[0],
+                    "seller_name": r[1],
+                    "message_url": r[2] or "",
+                    "listing_url": r[3] or "",
+                }
+                for r in rows[:batch_size]
+            ]
             after = max(0, len(rows) - len(batch))
 
             await broadcaster.log(
