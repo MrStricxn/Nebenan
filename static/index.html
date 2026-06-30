@@ -299,8 +299,12 @@ input,select,textarea{font-family:inherit;outline:none}
 .msg-avatar img{width:32px;height:32px;border-radius:50%;object-fit:cover}
 .msg-bubble{background:var(--s1);border-radius:14px;padding:10px 14px;font-size:14px;color:var(--t1);line-height:1.5;position:relative;max-width:100%}
 .msg-row.me .msg-bubble{background:var(--am);color:#000}
-.msg-time{font-size:11px;color:var(--t2);margin-top:4px}
-.msg-row.me .msg-time{text-align:right}
+.msg-time{font-size:11px;color:var(--t2);margin-top:4px;display:flex;align-items:center;gap:6px}
+.msg-row.me .msg-time{justify-content:flex-end}
+.msg-translate-btn{font-size:11px;color:var(--t2);background:none;border:1px solid var(--bd);border-radius:4px;padding:1px 5px;cursor:pointer;line-height:1.4;white-space:nowrap}
+.msg-translate-btn:hover{background:var(--s2);color:var(--t1)}
+.msg-translation{margin-top:6px;padding:7px 10px;background:rgba(0,0,0,.06);border-left:2px solid var(--am);border-radius:0 6px 6px 0;font-size:13px;color:var(--t1);line-height:1.45}
+.msg-row.me .msg-translation{background:rgba(0,0,0,.12);border-left-color:rgba(0,0,0,.3)}
 .msg-embed{margin-top:10px;background:var(--s0);border:1px solid var(--bd);border-radius:10px;overflow:hidden;font-size:12px}
 .msg-embed-imgs{display:flex;gap:4px;padding:8px}
 .msg-embed-imgs img{width:80px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer}
@@ -1163,14 +1167,46 @@ function renderMessage(m, users) {
 
   const time = m.created_at ? fmtTime(m.created_at) : '';
   const rowCls = isMe ? 'msg-row me' : 'msg-row';
+  const msgId = `msg-${m.id || Math.random().toString(36).slice(2)}`;
+  const body = m.body || '';
 
-  return `<div class="${rowCls}">
+  return `<div class="${rowCls}" id="${msgId}">
     ${avatarHtml}
     <div>
-      <div class="msg-bubble">${esc(m.body||'')}${embedHtml}${imgsHtml}</div>
-      <div class="msg-time">${esc(time)}</div>
+      <div class="msg-bubble">${esc(body)}${embedHtml}${imgsHtml}</div>
+      <div class="msg-time">
+        <span>${esc(time)}</span>
+        ${body ? `<button class="msg-translate-btn" onclick="translateMsg(this, ${JSON.stringify(body)}, '${msgId}')">🌐 RU</button>` : ''}
+      </div>
     </div>
   </div>`;
+}
+
+async function translateMsg(btn, text, rowId) {
+  const row = document.getElementById(rowId);
+  const bubble = row?.querySelector('.msg-bubble');
+  if (!bubble) return;
+  const existing = bubble.querySelector('.msg-translation');
+  if (existing) { existing.remove(); btn.textContent = '🌐 RU'; return; }
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=de|ru`);
+    const d = await r.json();
+    const translated = d?.responseData?.translatedText;
+    if (translated && translated !== text) {
+      const div = document.createElement('div');
+      div.className = 'msg-translation';
+      div.textContent = translated;
+      bubble.appendChild(div);
+      btn.textContent = '✕ RU';
+    } else {
+      btn.textContent = '🌐 RU';
+    }
+  } catch(e) {
+    btn.textContent = '🌐 RU';
+  }
+  btn.disabled = false;
 }
 
 function showNoConv() {
