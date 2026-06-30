@@ -264,6 +264,63 @@ input,select,textarea{font-family:inherit;outline:none}
   border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Chat ── */
+#page-chat{display:flex;flex-direction:column;height:calc(100vh - 110px);padding:0;gap:0}
+.chat-wrap{display:flex;flex:1;min-height:0;border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--s0)}
+.chat-sidebar{width:320px;flex-shrink:0;border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--s0)}
+.chat-acct-bar{padding:10px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+.chat-acct-bar select{flex:1;background:var(--s1);border:1px solid var(--bd);color:var(--t1);padding:6px 10px;border-radius:8px;font-size:13px;cursor:pointer}
+.chat-search{padding:10px 12px;border-bottom:1px solid var(--bd)}
+.chat-search input{width:100%;background:var(--s1);border:1px solid var(--bd);color:var(--t1);padding:7px 12px;border-radius:8px;font-size:13px;box-sizing:border-box}
+.chat-search input::placeholder{color:var(--t2)}
+.conv-list{flex:1;overflow-y:auto;padding:4px 0}
+.conv-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-radius:0;transition:background .15s;border-bottom:1px solid var(--bd)}
+.conv-item:hover{background:var(--s1)}
+.conv-item.active{background:rgba(232,160,32,.1);border-left:3px solid var(--am)}
+.conv-avatar{width:42px;height:42px;border-radius:50%;background:var(--s2);flex-shrink:0;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--t2)}
+.conv-avatar img{width:42px;height:42px;border-radius:50%;object-fit:cover}
+.conv-info{flex:1;min-width:0}
+.conv-name{font-weight:600;font-size:14px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-last{font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.conv-time{font-size:11px;color:var(--t2)}
+.conv-unread{background:var(--am);color:#000;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chat-header{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;background:var(--s0)}
+.chat-header-name{font-weight:700;font-size:16px;color:var(--t1)}
+.chat-header-sub{font-size:12px;color:var(--t2);margin-top:2px}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.chat-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:14px}
+.msg-row{display:flex;gap:10px;max-width:75%}
+.msg-row.me{align-self:flex-end;flex-direction:row-reverse}
+.msg-avatar{width:32px;height:32px;border-radius:50%;background:var(--s2);flex-shrink:0;object-fit:cover}
+.msg-avatar img{width:32px;height:32px;border-radius:50%;object-fit:cover}
+.msg-bubble{background:var(--s1);border-radius:14px;padding:10px 14px;font-size:14px;color:var(--t1);line-height:1.5;position:relative;max-width:100%}
+.msg-row.me .msg-bubble{background:var(--am);color:#000}
+.msg-time{font-size:11px;color:var(--t2);margin-top:4px}
+.msg-row.me .msg-time{text-align:right}
+.msg-embed{margin-top:10px;background:var(--s0);border:1px solid var(--bd);border-radius:10px;overflow:hidden;font-size:12px}
+.msg-embed-imgs{display:flex;gap:4px;padding:8px}
+.msg-embed-imgs img{width:80px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer}
+.msg-embed-body{padding:8px 10px;color:var(--t1);font-weight:600}
+.msg-embed-desc{padding:0 10px 8px;color:var(--t2);font-size:11px;line-height:1.4}
+.chat-compose{border-top:1px solid var(--bd);padding:14px 18px;display:flex;flex-direction:column;gap:10px;background:var(--s0)}
+.compose-photos{display:flex;flex-wrap:wrap;gap:8px}
+.compose-photo-preview{position:relative;width:64px;height:64px}
+.compose-photo-preview img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--bd)}
+.compose-photo-preview .rm-photo{position:absolute;top:-6px;right:-6px;background:#e53e3e;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;line-height:18px;text-align:center;padding:0}
+.compose-row{display:flex;gap:10px;align-items:flex-end}
+.compose-textarea{flex:1;background:var(--s1);border:1px solid var(--bd);color:var(--t1);border-radius:10px;padding:10px 14px;font-size:14px;resize:none;font-family:inherit;min-height:44px;max-height:200px;transition:border-color .2s}
+.compose-textarea:focus{outline:none;border-color:var(--am)}
+.compose-textarea::placeholder{color:var(--t2)}
+.btn-attach{background:var(--s1);border:1px solid var(--bd);color:var(--t2);border-radius:10px;padding:10px 12px;cursor:pointer;font-size:18px;flex-shrink:0;transition:all .15s}
+.btn-attach:hover{border-color:var(--am);color:var(--am)}
+.btn-chat-send{background:var(--am);border:none;color:#000;border-radius:10px;padding:10px 20px;cursor:pointer;font-weight:700;font-size:14px;flex-shrink:0;transition:opacity .15s}
+.btn-chat-send:hover{opacity:.85}
+.btn-chat-send:disabled{opacity:.4;cursor:not-allowed}
+.chat-no-conv{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--t2);gap:8px}
+.chat-no-conv svg{opacity:.3}
 </style>
 </head>
 <body>
@@ -275,6 +332,7 @@ input,select,textarea{font-family:inherit;outline:none}
     <li><a href="#" class="active" data-page="dashboard">Дашборд</a></li>
     <li><a href="#" data-page="parser">Парсер</a></li>
     <li><a href="#" data-page="sender">Рассылка</a></li>
+    <li><a href="#" data-page="chat">💬 Чат</a></li>
     <li><a href="#" data-page="inbox">Входящие</a></li>
     <li><a href="#" data-page="accounts">Аккаунты</a></li>
     <li><a href="#" data-page="scheduler">Планировщик</a></li>
@@ -420,6 +478,56 @@ input,select,textarea{font-family:inherit;outline:none}
           <thead><tr><th>Продавец</th><th>Объявление</th><th>Цена</th><th>Категория</th></tr></thead>
           <tbody id="queue-tbody"><tr><td colspan="4" class="tbl-empty">Загрузка...</td></tr></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="page" id="page-chat">
+    <div class="chat-wrap">
+      <!-- Sidebar: account + conversation list -->
+      <div class="chat-sidebar">
+        <div class="chat-acct-bar">
+          <span style="font-size:12px;color:var(--t2);flex-shrink:0">Аккаунт:</span>
+          <select id="chat-acct-select" onchange="onChatAccountChange()"></select>
+          <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px" onclick="loadConversations()">↺</button>
+        </div>
+        <div class="chat-search">
+          <input id="chat-search" type="text" placeholder="Поиск по имени..." oninput="filterConvs()">
+        </div>
+        <div class="conv-list" id="conv-list">
+          <div style="padding:20px;text-align:center;color:var(--t2);font-size:13px">Выберите аккаунт</div>
+        </div>
+      </div>
+
+      <!-- Main: messages + compose -->
+      <div class="chat-main" id="chat-main">
+        <div class="chat-no-conv" id="chat-no-conv">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Выберите переписку</span>
+        </div>
+
+        <div id="chat-thread" style="display:none;flex:1;flex-direction:column;min-height:0">
+          <div class="chat-header" id="chat-header">
+            <div class="conv-avatar" id="chat-header-avatar">👤</div>
+            <div>
+              <div class="chat-header-name" id="chat-header-name"></div>
+              <div class="chat-header-sub" id="chat-header-sub"></div>
+            </div>
+          </div>
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-compose">
+            <div class="compose-photos" id="compose-photos" style="display:none"></div>
+            <div class="compose-row">
+              <button class="btn-attach" title="Прикрепить фото" onclick="document.getElementById('photo-input').click()">📎</button>
+              <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="onPhotosSelected(this)">
+              <textarea class="compose-textarea" id="compose-text" rows="1" placeholder="Написать сообщение..."
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"
+                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,200)+'px'"></textarea>
+              <button class="btn-chat-send" id="btn-chat-send" onclick="sendChatMessage()">➤</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -603,6 +711,7 @@ function onPageEnter(name) {
   if (name === 'dashboard') { loadStats(); renderDashActivity(); }
   if (name === 'parser')    { loadStats(); loadAccountCount(); }
   if (name === 'sender')    { loadStats(); loadQueue(); loadTemplates(); loadSenderStatus(); }
+  if (name === 'chat')      { initChat(); }
   if (name === 'inbox')     { loadStats(); loadTemplates(); }
   if (name === 'accounts')  { loadAccountCards(); }
   if (name === 'scheduler') { loadSchedulerStatus(); }
@@ -877,6 +986,257 @@ async function saveSettings() {
 function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v; }
 function intVal(id)   { return parseInt(document.getElementById(id)?.value || '0'); }
 function floatVal(id) { return parseFloat(document.getElementById(id)?.value || '0'); }
+
+// ══════════════════════════════════════════
+// ── CHAT ──
+// ══════════════════════════════════════════
+let _chatAccount  = '';
+let _chatPartnerId = null;
+let _chatMyId      = null;
+let _allConvs      = [];
+let _photoFiles    = [];
+
+async function initChat() {
+  try {
+    const r = await api('/api/chat/accounts');
+    const sel = document.getElementById('chat-acct-select');
+    sel.innerHTML = r.accounts.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join('');
+    _chatAccount = r.accounts[0] || '';
+    if (_chatAccount) await loadConversations();
+  } catch(e) { console.error(e); }
+}
+
+async function onChatAccountChange() {
+  _chatAccount = document.getElementById('chat-acct-select').value;
+  _chatPartnerId = null;
+  showNoConv();
+  await loadConversations();
+}
+
+async function loadConversations() {
+  if (!_chatAccount) return;
+  document.getElementById('conv-list').innerHTML = '<div style="padding:20px;text-align:center;color:var(--t2);font-size:13px"><span class="spinner" style="display:inline-block"></span></div>';
+  try {
+    const r = await api(`/api/chat/conversations?account=${encodeURIComponent(_chatAccount)}`);
+    _allConvs = r.conversations || [];
+    renderConvList(_allConvs);
+  } catch(e) {
+    document.getElementById('conv-list').innerHTML = '<div style="padding:20px;text-align:center;color:var(--err);font-size:13px">Ошибка загрузки</div>';
+  }
+}
+
+function filterConvs() {
+  const q = document.getElementById('chat-search').value.toLowerCase();
+  renderConvList(q ? _allConvs.filter(c => {
+    const u = c._linkedUser || {};
+    const name = `${u.firstname||''} ${u.lastname||''}`.toLowerCase();
+    return name.includes(q);
+  }) : _allConvs);
+}
+
+function renderConvList(convs) {
+  // Build partner_id → linked_user map from last seen messages call (not available here, use conv data)
+  const list = document.getElementById('conv-list');
+  if (!convs.length) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--t2);font-size:13px">Нет переписок</div>';
+    return;
+  }
+  list.innerHTML = convs.map(c => {
+    const u = c._linkedUser || {};
+    const pid = c.partner_id;
+    const lastMsg = c.last_private_conversation_message || {};
+    const name = u.name || u.firstname ? `${u.firstname||''} ${u.lastname||''}`.trim() : `Собеседник ${pid}`;
+    const avatar = u.photo_thumb_url || u.photo_url;
+    const avatarHtml = avatar
+      ? `<div class="conv-avatar"><img src="${esc(avatar)}" alt=""></div>`
+      : `<div class="conv-avatar">👤</div>`;
+    const lastText = lastMsg.body ? lastMsg.body.slice(0, 55) + (lastMsg.body.length > 55 ? '…' : '') : '';
+    const time = lastMsg.created_at ? fmtTime(lastMsg.created_at) : '';
+    const unread = c.unseen ? '<span class="conv-unread">!</span>' : '';
+    const active = pid == _chatPartnerId ? ' active' : '';
+    return `<div class="conv-item${active}" onclick="openConv(${pid}, ${JSON.stringify(name)}, ${JSON.stringify(avatar||'')})">
+      ${avatarHtml}
+      <div class="conv-info">
+        <div class="conv-name">${esc(name)}</div>
+        <div class="conv-last">${esc(lastText)}</div>
+      </div>
+      <div class="conv-meta">
+        <span class="conv-time">${esc(time)}</span>
+        ${unread}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function openConv(partnerId, name, avatarUrl) {
+  _chatPartnerId = partnerId;
+  document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.conv-item[onclick*="openConv(${partnerId},"]`)?.classList.add('active');
+
+  // Show thread panel
+  document.getElementById('chat-no-conv').style.display  = 'none';
+  const thread = document.getElementById('chat-thread');
+  thread.style.display = 'flex';
+
+  // Header
+  const hdrName = document.getElementById('chat-header-name');
+  const hdrSub  = document.getElementById('chat-header-sub');
+  const hdrAv   = document.getElementById('chat-header-avatar');
+  hdrName.textContent = name;
+  hdrSub.textContent  = `partner_id: ${partnerId}`;
+  if (avatarUrl) hdrAv.innerHTML = `<img src="${esc(avatarUrl)}" alt="">`;
+  else hdrAv.textContent = '👤';
+
+  // Load messages
+  await loadMessages(partnerId);
+}
+
+async function loadMessages(partnerId) {
+  const box = document.getElementById('chat-messages');
+  box.innerHTML = '<div class="chat-empty"><span class="spinner" style="display:inline-block"></span></div>';
+  try {
+    const r = await api(`/api/chat/messages?account=${encodeURIComponent(_chatAccount)}&partner_id=${partnerId}`);
+    _chatMyId = r.my_id;
+    const msgs = r.private_conversation_messages || [];
+    const users = {};
+    for (const u of (r.linked_users || [])) users[u.id] = u;
+
+    // Enrich conversation list with user names
+    const conv = _allConvs.find(c => c.partner_id == partnerId);
+    if (conv && users[partnerId]) {
+      conv._linkedUser = users[partnerId];
+      renderConvList(_allConvs);
+      // Re-mark active
+      document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.conv-item[onclick*="openConv(${partnerId},"]`)?.classList.add('active');
+    }
+
+    if (!msgs.length) {
+      box.innerHTML = '<div class="chat-empty">Нет сообщений</div>';
+      return;
+    }
+
+    box.innerHTML = msgs.map(m => renderMessage(m, users)).join('');
+    box.scrollTop = box.scrollHeight;
+  } catch(e) {
+    box.innerHTML = '<div class="chat-empty" style="color:var(--err)">Ошибка загрузки</div>';
+  }
+}
+
+function renderMessage(m, users) {
+  const isMe = m.sender_id == _chatMyId;
+  const sender = users[m.sender_id] || {};
+  const avatarUrl = sender.photo_thumb_url || sender.photo_url || '';
+  const avatarHtml = avatarUrl
+    ? `<img class="msg-avatar" src="${esc(avatarUrl)}" alt="">`
+    : `<div class="msg-avatar" style="display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--t2)">${isMe ? '🤖' : '👤'}</div>`;
+
+  // Build embeddable preview (linked listing)
+  let embedHtml = '';
+  for (const emb of (m.embeddables || [])) {
+    const meta = emb.meta || {};
+    const imgs = (meta.images || []).slice(0, 4);
+    const imgRow = imgs.length ? `<div class="msg-embed-imgs">${imgs.map(i => `<img src="${esc(i.url||i.url_medium||i.original_url)}" alt="" onclick="window.open('${esc(i.original_url)}','_blank')">`).join('')}</div>` : '';
+    embedHtml += `<div class="msg-embed">
+      ${imgRow}
+      <div class="msg-embed-body">${esc(meta.subject||'')}</div>
+      ${meta.body ? `<div class="msg-embed-desc">${esc(meta.body.slice(0,120))}…</div>` : ''}
+    </div>`;
+  }
+
+  // Message images
+  let imgsHtml = '';
+  if ((m.images || []).length) {
+    imgsHtml = `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">` +
+      m.images.map(i => `<img src="${esc(i.url||i.url_medium)}" style="max-width:200px;border-radius:8px;cursor:pointer" onclick="window.open('${esc(i.original_url||i.url)}','_blank')">`).join('') +
+      `</div>`;
+  }
+
+  const time = m.created_at ? fmtTime(m.created_at) : '';
+  const rowCls = isMe ? 'msg-row me' : 'msg-row';
+
+  return `<div class="${rowCls}">
+    ${avatarHtml}
+    <div>
+      <div class="msg-bubble">${esc(m.body||'')}${embedHtml}${imgsHtml}</div>
+      <div class="msg-time">${esc(time)}</div>
+    </div>
+  </div>`;
+}
+
+function showNoConv() {
+  document.getElementById('chat-no-conv').style.display  = 'flex';
+  document.getElementById('chat-thread').style.display   = 'none';
+}
+
+// Photo attachments
+let _photoPreviews = [];
+function onPhotosSelected(input) {
+  _photoFiles = [..._photoFiles, ...input.files];
+  renderPhotoPreviews();
+  input.value = '';
+}
+function renderPhotoPreviews() {
+  const box = document.getElementById('compose-photos');
+  if (!_photoFiles.length) { box.style.display = 'none'; return; }
+  box.style.display = 'flex';
+  box.innerHTML = _photoFiles.map((f,i) => {
+    const url = URL.createObjectURL(f);
+    return `<div class="compose-photo-preview">
+      <img src="${url}" alt="">
+      <button class="rm-photo" onclick="removePhoto(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+function removePhoto(i) {
+  _photoFiles.splice(i, 1);
+  renderPhotoPreviews();
+}
+
+async function sendChatMessage() {
+  if (!_chatPartnerId || !_chatAccount) return;
+  const ta = document.getElementById('compose-text');
+  const text = ta.value.trim();
+  if (!text) return;
+
+  const btn = document.getElementById('btn-chat-send');
+  btn.disabled = true;
+  btn.textContent = '…';
+
+  try {
+    const r = await apiPost('/api/chat/send', {
+      account:    _chatAccount,
+      partner_id: _chatPartnerId,
+      text,
+    });
+    if (r.ok) {
+      ta.value = '';
+      ta.style.height = 'auto';
+      _photoFiles = [];
+      renderPhotoPreviews();
+      toast('Отправлено', 'ok');
+      // Reload messages
+      setTimeout(() => loadMessages(_chatPartnerId), 1500);
+    } else {
+      toast('Ошибка отправки', 'err');
+    }
+  } catch(e) {
+    toast('Ошибка отправки', 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '➤';
+  }
+}
+
+function fmtTime(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 60000)   return 'сейчас';
+  if (diff < 3600000) return `${Math.floor(diff/60000)} мин`;
+  if (diff < 86400000) return d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('ru', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+}
 
 // ── Actions ──
 async function runParser() {

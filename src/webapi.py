@@ -16,6 +16,7 @@ from src.db import init_db, upsert_listing, is_seller_new, get_stats
 from src.parser import parse_listings
 from src.sender import send_messages
 from src.inbox import check_and_reply
+from src.chat import get_token, fetch_conversations, fetch_messages, fetch_profile, send_reply
 
 
 # ─── State ────────────────────────────────────────────────────────────────────
@@ -547,6 +548,58 @@ async def api_scheduler_stop():
 @app.get("/api/scheduler/status")
 async def api_scheduler_status():
     return {"running": state.scheduler_running}
+
+
+# ─── Chat API ──────────────────────────────────────────────────────────────────
+
+def _account_token(name: str) -> str | None:
+    s = state.pool._accounts.get(name)
+    return get_token(s) if s else None
+
+
+def _account_state(name: str) -> dict | None:
+    return state.pool._accounts.get(name)
+
+
+@app.get("/api/chat/accounts")
+async def api_chat_accounts():
+    names = list(state.pool._accounts.keys())
+    return {"accounts": names}
+
+
+@app.get("/api/chat/conversations")
+async def api_chat_conversations(account: str, page: int = 1):
+    token = _account_token(account)
+    if not token:
+        return JSONResponse({"error": "Аккаунт не найден"}, status_code=404)
+    convs = await fetch_conversations(token, page=page, per_page=30)
+    return {"conversations": convs}
+
+
+@app.get("/api/chat/messages")
+async def api_chat_messages(account: str, partner_id: int, per_page: int = 50):
+    token = _account_token(account)
+    if not token:
+        return JSONResponse({"error": "Аккаунт не найден"}, status_code=404)
+    result = await fetch_messages(token, partner_id, per_page=per_page)
+    # Attach own user_id so the frontend knows which side is "me"
+    profile = await fetch_profile(token)
+    result["my_id"] = profile.get("id")
+    return result
+
+
+@app.post("/api/chat/send")
+async def api_chat_send(body: dict):
+    account    = body.get("account", "")
+    partner_id = body.get("partner_id")
+    text       = body.get("text", "").strip()
+    if not account or not partner_id or not text:
+        return JSONResponse({"error": "account, partner_id и text обязательны"}, status_code=400)
+    storage = _account_state(account)
+    if not storage:
+        return JSONResponse({"error": "Аккаунт не найден"}, status_code=404)
+    ok = await send_reply(storage, int(partner_id), text)
+    return {"ok": ok}
 
 
 # ─── Serve UI ──────────────────────────────────────────────────────────────────
