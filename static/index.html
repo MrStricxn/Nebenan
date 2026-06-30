@@ -325,7 +325,7 @@ input,select,textarea{font-family:inherit;outline:none}
         <div class="quick-name">Запустить парсер</div>
         <div class="quick-desc">Найти новые объявления</div>
       </div>
-      <div class="quick-card" onclick="goPage('sender');runSender()">
+      <div class="quick-card" onclick="goPage('sender')">
         <div class="quick-icon">📨</div>
         <div class="quick-name">Начать рассылку</div>
         <div class="quick-desc">Отправить новым продавцам</div>
@@ -395,9 +395,15 @@ input,select,textarea{font-family:inherit;outline:none}
     <div class="page-header">
       <div><div class="page-title">Рассылка</div><div class="page-sub">Отправка сообщений продавцам</div></div>
       <div class="gap">
-        <button class="btn btn-primary" id="btn-send" onclick="runSender()">▶ Начать рассылку</button>
-        <button class="btn btn-secondary" onclick="loadQueue()">↺ Обновить очередь</button>
+        <button class="btn btn-primary" id="btn-send-start" onclick="startSender()">▶ Запустить</button>
+        <button class="btn btn-danger"  id="btn-send-stop"  onclick="stopSender()" disabled style="background:#e53e3e;border-color:#e53e3e">■ Остановить</button>
+        <button class="btn btn-secondary" onclick="loadQueue()">↺ Обновить</button>
       </div>
+    </div>
+    <div id="sender-status-bar" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin-bottom:16px;display:none;align-items:center;gap:16px;flex-wrap:wrap">
+      <span class="status-badge status-ok" style="font-size:12px"><span class="acct-dot"></span> Работает</span>
+      <span id="sender-cycle-label" style="font-weight:600;color:var(--text)"></span>
+      <span id="sender-countdown" style="font-family:var(--mono);color:var(--muted);font-size:13px"></span>
     </div>
     <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);max-width:600px;margin-bottom:20px">
       <div class="stat-card"><div class="stat-label">В очереди</div><div class="stat-val" id="s-queue">—</div></div>
@@ -596,7 +602,7 @@ document.querySelectorAll('.topnav a').forEach(a => {
 function onPageEnter(name) {
   if (name === 'dashboard') { loadStats(); renderDashActivity(); }
   if (name === 'parser')    { loadStats(); loadAccountCount(); }
-  if (name === 'sender')    { loadStats(); loadQueue(); loadTemplates(); }
+  if (name === 'sender')    { loadStats(); loadQueue(); loadTemplates(); loadSenderStatus(); }
   if (name === 'inbox')     { loadStats(); loadTemplates(); }
   if (name === 'accounts')  { loadAccountCards(); }
   if (name === 'scheduler') { loadSchedulerStatus(); }
@@ -622,8 +628,10 @@ function connectWS() {
     const msg = JSON.parse(e.data);
     if (msg.type === 'log')          handleLog(msg);
     if (msg.type === 'task')         handleTask(msg);
-    if (msg.type === 'stats_refresh') loadStats();
-    if (msg.type === 'scheduler')    updateSchedBadge(msg.running);
+    if (msg.type === 'stats_refresh')   loadStats();
+    if (msg.type === 'scheduler')       updateSchedBadge(msg.running);
+    if (msg.type === 'sender_status')   updateSenderStatus(msg.running, msg.cycle);
+    if (msg.type === 'sender_countdown') startCountdown(msg.seconds, msg.next_cycle);
   };
 }
 function setDot(cls) {
@@ -637,7 +645,7 @@ function handleTask(msg) {
   const busy = msg.running;
   setDot(busy ? 'busy' : 'on');
   setLabel(busy ? (msg.label || 'Выполняется...') : 'Готов');
-  ['btn-parse','btn-send','btn-inbox'].forEach(id => {
+  ['btn-parse','btn-inbox'].forEach(id => {
     const b = document.getElementById(id);
     if (b) b.disabled = busy;
   });
@@ -880,12 +888,58 @@ async function runParser() {
     toast('Ошибка запуска парсера', 'err');
   }
 }
-async function runSender() {
+async function startSender() {
   try {
-    await apiPost('/api/sender/run', {});
+    await apiPost('/api/sender/start');
+    updateSenderStatus(true, 0);
   } catch {
     toast('Ошибка запуска рассылки', 'err');
   }
+}
+async function stopSender() {
+  try {
+    await apiPost('/api/sender/stop');
+  } catch {
+    toast('Ошибка остановки', 'err');
+  }
+}
+function updateSenderStatus(running, cycle) {
+  const start = document.getElementById('btn-send-start');
+  const stop  = document.getElementById('btn-send-stop');
+  const bar   = document.getElementById('sender-status-bar');
+  const label = document.getElementById('sender-cycle-label');
+  if (start) start.disabled = running;
+  if (stop)  stop.disabled  = !running;
+  if (bar)   bar.style.display = running ? 'flex' : 'none';
+  if (label && cycle) label.textContent = `Цикл #${cycle}`;
+  if (!running) { clearCountdown(); if (label) label.textContent = ''; }
+}
+let _countdownTimer = null;
+function clearCountdown() {
+  if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null; }
+  const el = document.getElementById('sender-countdown');
+  if (el) el.textContent = '';
+}
+function startCountdown(seconds, nextCycle) {
+  clearCountdown();
+  let rem = seconds;
+  const el    = document.getElementById('sender-countdown');
+  const label = document.getElementById('sender-cycle-label');
+  const tick = () => {
+    if (rem <= 0) { clearCountdown(); return; }
+    const m = Math.floor(rem / 60), s = rem % 60;
+    if (el)    el.textContent = `следующий цикл #${nextCycle} через ${m}:${String(s).padStart(2,'0')}`;
+    if (label) label.textContent = 'Ожидание';
+    rem--;
+  };
+  tick();
+  _countdownTimer = setInterval(tick, 1000);
+}
+async function loadSenderStatus() {
+  try {
+    const r = await api('/api/sender/status');
+    updateSenderStatus(r.running, 0);
+  } catch {}
 }
 async function runInbox() {
   try {

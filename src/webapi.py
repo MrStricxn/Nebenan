@@ -37,6 +37,9 @@ class AppState:
     scheduler_running: bool = False
     scheduler_task: asyncio.Task = None
     task_running: bool = False
+    sender_loop_running: bool = False
+    sender_loop_task: asyncio.Task = None
+    sender_stop_event: asyncio.Event = None
     log_history: list = []          # persisted across reloads, max 500
 
 state = AppState()
@@ -365,6 +368,117 @@ async def api_sender_run(body: Optional[dict] = None):
     max_per_run = (body or {}).get("max_per_run", 0)
     asyncio.create_task(_do_send(max_per_run))
     return {"ok": True}
+
+
+async def _sender_loop():
+    state.sender_loop_running = True
+    await broadcaster.broadcast({"type": "sender_status", "running": True, "cycle": 0})
+
+    per_account  = state.settings.get("per_account", 2)
+    cooldown_min = state.settings.get("cooldown_min", 15)
+    batch_size   = state.pool.total * per_account
+    run = 0
+
+    await broadcaster.log(
+        f"Рассылка запущена: {per_account}/аккаунт × {state.pool.total} = "
+        f"{batch_size} в цикле, кулдаун {cooldown_min} мин"
+    )
+
+    try:
+        while not state.sender_stop_event.is_set():
+            async with state.conn.execute(
+                "SELECT seller_id, seller_name, message_url FROM sellers WHERE message_sent = 0"
+            ) as cur:
+                rows = await cur.fetchall()
+
+            if not rows:
+                await broadcaster.log("Очередь пуста — все продавцы получили сообщение")
+                break
+
+            if state.templates.count == 0:
+                await broadcaster.log("Нет шаблонов — добавьте тексты в Shablon.txt", "warning")
+                break
+
+            run += 1
+            batch = [{"seller_id": r[0], "seller_name": r[1], "message_url": r[2] or ""}
+                     for r in rows[:batch_size]]
+            after = max(0, len(rows) - len(batch))
+
+            await broadcaster.log(
+                f"Цикл #{run}: {len(batch)} отправок ({per_account}/аккаунт), "
+                f"после: {after} в очереди"
+            )
+            await broadcaster.broadcast({"type": "sender_status", "running": True, "cycle": run})
+
+            state.task_running = True
+            await broadcaster.task_update(True, f"Рассылка — цикл #{run}")
+            try:
+                sent = await send_messages(
+                    batch, state.pool, state.templates, state.conn,
+                    delay=state.settings["delay"]
+                )
+            finally:
+                state.task_running = False
+                await broadcaster.task_update(False)
+
+            await broadcaster.log(f"Цикл #{run} завершён: {sent}/{len(batch)} отправлено")
+            await broadcaster.broadcast({"type": "stats_refresh"})
+
+            if state.sender_stop_event.is_set():
+                break
+
+            async with state.conn.execute(
+                "SELECT COUNT(*) FROM sellers WHERE message_sent = 0"
+            ) as cur:
+                remaining = (await cur.fetchone())[0]
+
+            if remaining == 0:
+                await broadcaster.log("Очередь пуста — рассылка завершена")
+                break
+
+            cooldown_sec = cooldown_min * 60
+            await broadcaster.log(f"Ожидание {cooldown_min} мин до цикла #{run+1} (в очереди: {remaining})")
+            await broadcaster.broadcast({
+                "type": "sender_countdown",
+                "seconds": cooldown_sec,
+                "next_cycle": run + 1,
+            })
+
+            try:
+                await asyncio.wait_for(state.sender_stop_event.wait(), timeout=float(cooldown_sec))
+                break  # stop event fired
+            except asyncio.TimeoutError:
+                pass   # normal — proceed to next cycle
+
+    except Exception as e:
+        await broadcaster.log(f"Ошибка рассылки: {e}", "error")
+    finally:
+        state.sender_loop_running = False
+        state.sender_loop_task = None
+        await broadcaster.broadcast({"type": "sender_status", "running": False, "cycle": 0})
+        await broadcaster.log("Рассылка остановлена")
+
+
+@app.post("/api/sender/start")
+async def api_sender_start():
+    if state.sender_loop_running:
+        return JSONResponse({"error": "Рассылка уже запущена"}, status_code=409)
+    state.sender_stop_event = asyncio.Event()
+    state.sender_loop_task  = asyncio.create_task(_sender_loop())
+    return {"ok": True, "running": True}
+
+
+@app.post("/api/sender/stop")
+async def api_sender_stop():
+    if state.sender_stop_event:
+        state.sender_stop_event.set()
+    await broadcaster.log("Остановка рассылки...", "warning")
+    return {"ok": True}
+
+
+@app.get("/api/sender/status")
+async def api_sender_status():
+    return {"running": state.sender_loop_running}
 
 
 @app.post("/api/inbox/check")
