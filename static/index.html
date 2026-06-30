@@ -1184,7 +1184,7 @@ function renderMessage(m, users) {
 
 async function translateMsg(btn) {
   const text   = btn.dataset.text;
-  const bubble = btn.closest('.msg-bubble');
+  const bubble = btn.closest('.msg-row').querySelector('.msg-bubble');
   if (!text || !bubble) return;
 
   const existing = bubble.querySelector('.msg-translation');
