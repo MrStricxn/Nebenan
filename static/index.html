@@ -525,6 +525,54 @@ input, select, textarea { font-family: inherit; outline: none }
 .btn-chat-send:hover   { opacity: .88 }
 .btn-chat-send:active  { transform: scale(.95) }
 .btn-chat-send:disabled { opacity: .4; cursor: not-allowed }
+
+/* ── Quick-reply strip ── */
+.qr-strip {
+  display: flex; gap: 6px; padding: 6px 0 2px; overflow-x: auto; flex-shrink: 0;
+  scrollbar-width: none;
+}
+.qr-strip::-webkit-scrollbar { display: none }
+.qr-btn {
+  background: var(--s1); border: 1px solid var(--bd); color: var(--t2);
+  border-radius: 20px; padding: 4px 12px; font-size: 12px; white-space: nowrap;
+  cursor: pointer; transition: color .12s, border-color .12s, background .12s; flex-shrink: 0;
+}
+.qr-btn:hover { color: var(--am); border-color: var(--am); background: var(--am10) }
+
+/* ── Lightbox ── */
+.lightbox {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.93); align-items: center; justify-content: center; cursor: zoom-out;
+}
+.lightbox.open { display: flex }
+.lb-img {
+  max-width: 90vw; max-height: 88vh; object-fit: contain;
+  border-radius: 6px; cursor: default; box-shadow: 0 8px 48px rgba(0,0,0,.6);
+  user-select: none;
+}
+.lb-close {
+  position: absolute; top: 18px; right: 22px;
+  background: rgba(255,255,255,.12); color: #fff; border: none; border-radius: 50%;
+  width: 38px; height: 38px; font-size: 17px; cursor: pointer; transition: background .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.lb-close:hover { background: rgba(255,255,255,.25) }
+.lb-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,.12); color: #fff; border: none; border-radius: 50%;
+  width: 48px; height: 48px; font-size: 26px; cursor: pointer; transition: background .15s;
+  display: none; align-items: center; justify-content: center;
+}
+.lb-arrow:hover { background: rgba(255,255,255,.25) }
+.lb-arrow.show  { display: flex }
+#lb-prev { left: 20px }
+#lb-next { right: 20px }
+.lb-counter {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,.5); color: rgba(255,255,255,.7); font-size: 12px;
+  padding: 4px 12px; border-radius: 12px; display: none;
+}
+.lb-counter.show { display: block }
 </style>
 </head>
 <body>
@@ -723,6 +771,7 @@ input, select, textarea { font-family: inherit; outline: none }
           </div>
           <div class="chat-messages" id="chat-messages"></div>
           <div class="chat-compose">
+            <div class="qr-strip" id="qr-strip"></div>
             <div class="compose-photos" id="compose-photos" style="display:none"></div>
             <div class="compose-row">
               <button class="btn-attach" title="Прикрепить фото" onclick="document.getElementById('photo-input').click()">📎</button>
@@ -885,10 +934,84 @@ input, select, textarea { font-family: inherit; outline: none }
   <div class="log-drawer-entries" id="log-entries"></div>
 </div>
 
+<!-- ── Lightbox ── -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lb-close" onclick="event.stopPropagation();closeLightbox()">✕</button>
+  <button class="lb-arrow" id="lb-prev" onclick="event.stopPropagation();lbNav(-1)">‹</button>
+  <img class="lb-img" id="lb-img" onclick="event.stopPropagation()" alt="">
+  <button class="lb-arrow" id="lb-next" onclick="event.stopPropagation();lbNav(1)">›</button>
+  <div class="lb-counter" id="lb-counter"></div>
+</div>
+
 <!-- ── Toast ── -->
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
+// ── Quick-reply templates ──
+const _quickReplies = [
+  {
+    label: '🤝 Zahlung & Treffen',
+    text: 'Ja. Ich hоle еs pеrsönliсh ab, аbеr iсh habe Ihnen bеrеits die Zahlung gеsсhiсkt. Wir müssеn das klärеn, und wenn du das Geld hast, rеden wir übеr еin Тreffen.🤝',
+  },
+  {
+    label: '📱 NebenanPay erklären',
+    text: 'Okay, jetzt hab ich verstanden, wo das Problem liegt. Das ist also Ihr erster Verkauf über NebenanPay\nIch erklär Ihnen kurz, wie das Ganze funktioniert.\n\nDamit Sie das Geld gleich bekommen und der Verkauf bestätigt wird, machen Sie bitte Folgendes:\n\n1. Scan qr\n2. Klicken Sie dann auf „Akzeptieren“ oder „Geld erhalten“.\n3. Wählen Sie Ihre Bank aus und melden Sie sich dort an.\n4. Das Geld wird Ihnen in etwa 30 Minuten gutgeschrieben.',
+  },
+];
+
+function renderQuickReplies() {
+  const strip = document.getElementById('qr-strip');
+  if (!strip) return;
+  strip.innerHTML = _quickReplies.map((r, i) =>
+    `<button class="qr-btn" onclick="insertQR(${i})">${esc(r.label)}</button>`
+  ).join('');
+}
+
+function insertQR(idx) {
+  const ta = document.getElementById('compose-text');
+  if (!ta) return;
+  ta.value = _quickReplies[idx].text;
+  ta.focus();
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 180) + 'px';
+}
+
+// ── Lightbox ──
+let _lbImages = [];
+let _lbIdx    = 0;
+
+function openLightbox(urls, startIdx) {
+  _lbImages = urls;
+  _lbIdx    = startIdx || 0;
+  const img     = document.getElementById('lb-img');
+  const prev    = document.getElementById('lb-prev');
+  const next    = document.getElementById('lb-next');
+  const counter = document.getElementById('lb-counter');
+  img.src       = _lbImages[_lbIdx];
+  const multi   = _lbImages.length > 1;
+  prev.classList.toggle('show', multi);
+  next.classList.toggle('show', multi);
+  counter.classList.toggle('show', multi);
+  if (multi) counter.textContent = `${_lbIdx + 1} / ${_lbImages.length}`;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function lbNav(dir) {
+  _lbIdx = (_lbIdx + dir + _lbImages.length) % _lbImages.length;
+  document.getElementById('lb-img').src = _lbImages[_lbIdx];
+  document.getElementById('lb-counter').textContent = `${_lbIdx + 1} / ${_lbImages.length}`;
+}
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'Escape')      closeLightbox();
+  if (e.key === 'ArrowLeft')   lbNav(-1);
+  if (e.key === 'ArrowRight')  lbNav(1);
+});
+
 // ── State ──
 let logs = [];
 let hideTimer = null;
@@ -1213,6 +1336,7 @@ let _allConvs      = [];
 let _photoFiles    = [];
 
 async function initChat() {
+  renderQuickReplies();
   const convList = document.getElementById('conv-list');
   if (!convList._chatWired) {
     convList._chatWired = true;
@@ -1507,10 +1631,15 @@ function renderMessage(m, users) {
 
   let embedHtml = '';
   for (const emb of (m.embeddables || [])) {
-    const meta   = emb.meta || {};
-    const imgs   = (meta.images || []).slice(0, 4);
-    const imgRow = imgs.length
-      ? `<div class="msg-embed-imgs">${imgs.map(i => `<img src="${esc(i.url||i.url_medium||i.original_url)}" alt="" onclick="window.open('${esc(i.original_url||i.url)}','_blank')">`).join('')}</div>` : '';
+    const meta    = emb.meta || {};
+    const imgs    = (meta.images || []).slice(0, 4);
+    const imgUrls = imgs.map(i => i.original_url || i.url);
+    const imgRow  = imgs.length
+      ? `<div class="msg-embed-imgs">${imgs.map((i, idx) => {
+          const src = esc(i.url || i.url_medium || i.original_url);
+          const all = JSON.stringify(imgUrls).replace(/"/g, '&quot;');
+          return `<img src="${src}" alt="" onclick="openLightbox(JSON.parse(this.dataset.all),${idx})" data-all="${all}" style="cursor:zoom-in">`;
+        }).join('')}</div>` : '';
     embedHtml += `<div class="msg-embed">${imgRow}
       <div class="msg-embed-body">${esc(meta.subject || '')}</div>
       ${meta.body ? `<div class="msg-embed-desc">${esc(meta.body.slice(0,120))}…</div>` : ''}
@@ -1519,8 +1648,13 @@ function renderMessage(m, users) {
 
   let imgsHtml = '';
   if ((m.images || []).length) {
+    const imgUrls = m.images.map(i => i.original_url || i.url);
     imgsHtml = `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">` +
-      m.images.map(i => `<img src="${esc(i.url||i.url_medium)}" style="max-width:200px;border-radius:8px;cursor:pointer" onclick="window.open('${esc(i.original_url||i.url)}','_blank')">`).join('') + '</div>';
+      m.images.map((i, idx) => {
+        const src = esc(i.url || i.url_medium);
+        const all = JSON.stringify(imgUrls).replace(/"/g, '&quot;');
+        return `<img src="${src}" style="max-width:200px;border-radius:8px;cursor:zoom-in" onclick="openLightbox(JSON.parse(this.dataset.all),${idx})" data-all="${all}">`;
+      }).join('') + '</div>';
   }
 
   const time  = m.created_at ? fmtTime(m.created_at) : '';
