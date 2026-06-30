@@ -91,16 +91,27 @@ async def _check_replies_via_api(
     return replied_seller_ids
 
 
+_TRIGGER_EVENTS = """
+    el => {
+        el.dispatchEvent(new Event('focus', { bubbles: true }));
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+"""
+
 async def _send_phase2_playwright(page, seller: dict, template: str) -> bool:
-    """Phase 2: reply in existing conversation — navigate to messages URL directly."""
+    """Phase 2: reply in existing conversation."""
     try:
         msg_url = seller.get("message_url") or f"{BASE_URL}/messages/{seller['seller_id']}"
         await page.goto(msg_url, timeout=30000)
-        await page.wait_for_selector(_INPUT_MESSAGE, timeout=12000)
-        await page.fill(_INPUT_MESSAGE, template)
-        await page.wait_for_timeout(500)
-        await page.click(_BTN_SEND, timeout=10000)
-        await page.wait_for_timeout(1000)
+        textarea = page.locator(_INPUT_MESSAGE)
+        await textarea.wait_for(timeout=12000)
+        await textarea.click()
+        await textarea.fill(template)
+        await textarea.evaluate(_TRIGGER_EVENTS)
+        await page.wait_for_timeout(600)
+        await page.locator(_BTN_SEND).click(timeout=8000)
+        await page.wait_for_timeout(1200)
         return True
     except Exception as e:
         log.warning(f"  ошибка Phase 2 ({seller.get('seller_name', '?')}): {e}")
@@ -170,13 +181,14 @@ async def check_and_reply(
                     )
                     page = await ctx.new_page()
                     template = template_loader.get_random()
+                    # Mark BEFORE sending — prevents double-send even if the process crashes mid-send
+                    await mark_phase2_sent(conn, seller["seller_id"])
                     success = await _send_phase2_playwright(page, seller, template)
                     if success:
-                        await mark_phase2_sent(conn, seller["seller_id"])
                         sent_count += 1
                         log.info(f"[{account_name}] ✓ Phase 2 отправлен → {seller['seller_name']}")
                     else:
-                        log.warning(f"[{account_name}] ✗ Phase 2 не отправлен → {seller['seller_name']}")
+                        log.warning(f"[{account_name}] ✗ Phase 2 не удалось отправить → {seller['seller_name']}")
                     await browser.close()
             except Exception as e:
                 log.error(f"[{account_name}] критическая ошибка Phase 2: {e}")
