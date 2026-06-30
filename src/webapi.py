@@ -699,6 +699,29 @@ async def api_chat_send(body: dict):
     return {"ok": ok}
 
 
+@app.get("/api/sellers/{seller_id}/listing")
+async def api_seller_listing(seller_id: int):
+    """Most recent listing for a seller — used in chat header."""
+    async with state.conn.execute(
+        """SELECT l.url, l.title, l.price, s.message_url
+           FROM listings l
+           JOIN sellers s ON s.seller_id = l.seller_id
+           WHERE l.seller_id = ?
+           ORDER BY l.parsed_at DESC LIMIT 1""",
+        (str(seller_id),),
+    ) as cur:
+        row = await cur.fetchone()
+    if row:
+        return {"url": row[0], "title": row[1], "price": row[2]}
+    async with state.conn.execute(
+        "SELECT message_url FROM sellers WHERE seller_id = ?", (str(seller_id),)
+    ) as cur:
+        srow = await cur.fetchone()
+    if srow and srow[0]:
+        return {"url": srow[0], "title": None, "price": None}
+    return {"url": None, "title": None, "price": None}
+
+
 @app.get("/api/chat/search")
 async def api_chat_search(account: str, q: str):
     if not q or len(q.strip()) < 2:
