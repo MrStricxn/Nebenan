@@ -332,6 +332,7 @@ input, select, textarea { font-family: inherit; outline: none }
 .conv-last   { font-size: 11.5px; color: var(--t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px }
 .conv-meta   { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0 }
 .conv-time   { font-size: 10.5px; color: var(--t3) }
+.conv-match  { font-size: 11px; color: var(--am); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .conv-unread {
   background: var(--am); color: #000; font-size: 10px; font-weight: 700;
   padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center;
@@ -618,8 +619,9 @@ input, select, textarea { font-family: inherit; outline: none }
           <select id="chat-acct-select" onchange="onChatAccountChange()"></select>
           <button class="chat-refresh-btn" onclick="loadConversations()" title="Обновить">↺</button>
         </div>
-        <div class="chat-search">
-          <input id="chat-search" type="text" placeholder="Поиск по имени..." oninput="filterConvs()">
+        <div class="chat-search" style="position:relative">
+          <input id="chat-search" type="text" placeholder="Имя, сообщение, объявление..." oninput="onSearchInput()">
+          <span id="search-spinner" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%)"><span class="spinner" style="width:12px;height:12px;border-width:1.5px"></span></span>
         </div>
         <div class="conv-list" id="conv-list">
           <div class="chat-empty">Выберите аккаунт</div>
@@ -1155,13 +1157,75 @@ async function loadConversations() {
   }
 }
 
-function filterConvs() {
-  const q = document.getElementById('chat-search').value.toLowerCase();
-  renderConvList(q ? _allConvs.filter(c => {
-    const u = c._linkedUser || {};
-    const n = `${u.firstname || ''} ${u.lastname || ''} ${u.name || ''}`.toLowerCase();
-    return n.includes(q);
-  }) : _allConvs);
+let _searchTimer = null;
+function onSearchInput() {
+  clearTimeout(_searchTimer);
+  const q = document.getElementById('chat-search').value.trim();
+  if (!q) { renderConvList(_allConvs); return; }
+  _searchTimer = setTimeout(() => runSearch(q), 320);
+}
+
+async function runSearch(q) {
+  const spinner = document.getElementById('search-spinner');
+  if (spinner) spinner.style.display = '';
+  try {
+    // 1. Client-side: match against last message body
+    const msgMatch = {};
+    for (const c of _allConvs) {
+      const body = (c.last_private_conversation_message?.body || '').toLowerCase();
+      if (body.includes(q.toLowerCase())) {
+        msgMatch[c.partner_id] = c.last_private_conversation_message.body;
+      }
+    }
+
+    // 2. Backend: match by seller name + listing title (DB)
+    let backendMap = {};
+    try {
+      const r = await api(`/api/chat/search?account=${encodeURIComponent(_chatAccount)}&q=${encodeURIComponent(q)}`);
+      for (const res of (r.results || [])) backendMap[res.partner_id] = res;
+    } catch(e) {}
+
+    // 3. Merge — annotate matching convs, keep order
+    const matched = [];
+    for (const c of _allConvs) {
+      const pid = c.partner_id;
+      const be  = backendMap[pid];
+      const msg = msgMatch[pid];
+      if (!be && !msg) continue;
+
+      const copy = Object.assign({}, c);
+      if (be?.match === 'listing' || be?.listing_title) {
+        copy._match = { icon: '🏷', text: be.matched_text || be.listing_title };
+      } else if (be?.match === 'name') {
+        copy._match = { icon: '👤', text: be.matched_text };
+      }
+      if (msg && !copy._match) {
+        copy._match = { icon: '💬', text: msg.slice(0, 60) };
+      } else if (msg && copy._match) {
+        // also matched message — prefer listing/name tag, append msg preview
+        copy._matchMsg = msg.slice(0, 60);
+      }
+      matched.push(copy);
+    }
+
+    // 4. Also show backend results not in loaded convs (seller in DB but conv not yet loaded)
+    const loadedPids = new Set(_allConvs.map(c => c.partner_id));
+    for (const [pid, be] of Object.entries(backendMap)) {
+      if (!loadedPids.has(parseInt(pid))) {
+        matched.push({
+          partner_id: be.partner_id,
+          _linkedUser: { name: be.seller_name },
+          last_private_conversation_message: {},
+          _match: { icon: be.match === 'listing' ? '🏷' : '👤', text: be.matched_text },
+          _notLoaded: true,
+        });
+      }
+    }
+
+    renderConvList(matched, true);
+  } finally {
+    if (spinner) spinner.style.display = 'none';
+  }
 }
 
 function convName(c) {
@@ -1170,10 +1234,11 @@ function convName(c) {
   return full || u.name || `Собеседник ${c.partner_id}`;
 }
 
-function renderConvList(convs) {
+function renderConvList(convs, showMatch = false) {
   const list = document.getElementById('conv-list');
   if (!convs.length) {
-    list.innerHTML = '<div class="chat-empty">Нет переписок</div>';
+    const q = document.getElementById('chat-search').value.trim();
+    list.innerHTML = `<div class="chat-empty">${q ? `Ничего не найдено по «${esc(q)}»` : 'Нет переписок'}</div>`;
     return;
   }
   list.innerHTML = convs.map(c => {
@@ -1189,11 +1254,17 @@ function renderConvList(convs) {
     const avHtml  = avatar
       ? `<div class="conv-avatar"><img src="${esc(avatar)}" alt=""></div>`
       : `<div class="conv-avatar">👤</div>`;
+    const matchHtml = showMatch && c._match
+      ? `<div class="conv-match">${c._match.icon} ${esc(c._match.text.slice(0, 55))}</div>`
+      : '';
+    const dimNote = c._notLoaded
+      ? '<span style="font-size:10px;color:var(--t3)"> · нет чата</span>' : '';
     return `<div class="conv-item${active}" data-pid="${pid}" data-name="${esc(name)}" data-avatar="${esc(avatar)}">
       ${avHtml}
       <div class="conv-info">
-        <div class="conv-name">${esc(name)}</div>
+        <div class="conv-name">${esc(name)}${dimNote}</div>
         <div class="conv-last">${esc(lastTxt)}</div>
+        ${matchHtml}
       </div>
       <div class="conv-meta">
         <span class="conv-time">${esc(time)}</span>

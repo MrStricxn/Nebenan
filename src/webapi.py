@@ -699,6 +699,58 @@ async def api_chat_send(body: dict):
     return {"ok": ok}
 
 
+@app.get("/api/chat/search")
+async def api_chat_search(account: str, q: str):
+    if not q or len(q.strip()) < 2:
+        return {"results": [], "query": q}
+    if not _account_token(account):
+        return JSONResponse({"error": "Аккаунт не найден"}, status_code=404)
+
+    like = f"%{q.strip().lower()}%"
+
+    # Search by seller name
+    async with state.conn.execute(
+        "SELECT seller_id, seller_name FROM sellers WHERE LOWER(seller_name) LIKE ?",
+        (like,),
+    ) as cur:
+        name_rows = await cur.fetchall()
+
+    # Search by listing title (most recent title per seller)
+    async with state.conn.execute(
+        """
+        SELECT s.seller_id, s.seller_name, l.title
+        FROM listings l
+        JOIN sellers s ON s.seller_id = l.seller_id
+        WHERE LOWER(l.title) LIKE ?
+        ORDER BY l.parsed_at DESC
+        """,
+        (like,),
+    ) as cur:
+        title_rows = await cur.fetchall()
+
+    results: dict[str, dict] = {}
+    for sid, sname in name_rows:
+        results[str(sid)] = {
+            "partner_id":   int(sid),
+            "seller_name":  sname,
+            "match":        "name",
+            "matched_text": sname,
+        }
+    for sid, sname, title in title_rows:
+        key = str(sid)
+        if key not in results:
+            results[key] = {
+                "partner_id":   int(sid),
+                "seller_name":  sname,
+                "match":        "listing",
+                "matched_text": title,
+            }
+        else:
+            results[key]["listing_title"] = title
+
+    return {"results": list(results.values()), "query": q}
+
+
 # ─── Serve UI ──────────────────────────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
