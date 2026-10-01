@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime, timezone, timedelta
-from src.parser import _is_within_hours, _extract_from_api_page, _get_auth_token
+from src.parser import _is_within_hours, _extract_from_api_page, _get_auth_token, _is_free_listing
 
 
 SAMPLE_API_PAGE = [
@@ -92,3 +92,51 @@ def test_get_auth_token():
 def test_get_auth_token_missing():
     state = {"cookies": [{"name": "session", "value": "x", "domain": "nebenan.de"}], "origins": []}
     assert _get_auth_token(state) is None
+
+
+def _free_post(**kw):
+    post = {
+        "id": 111,
+        "subject": "Alter Stuhl",
+        "created_at": "2026-06-29T10:30:00Z",
+        "author_details": {
+            "associated_gid": "gid://nebenan/User/555",
+            "name": "Max",
+            "private_message_url": "https://nebenan.de/messages/555",
+        },
+        "marketplace_details": {"price_in_cents": None, "category": {"title": "Möbel"}},
+    }
+    post.update(kw)
+    return {"post": post}
+
+
+def test_free_marketplace_free_skipped():
+    assert _extract_from_api_page([_free_post(content_type="marketplace_free")]) == []
+
+
+def test_free_zero_price_skipped():
+    page = [_free_post()]
+    page[0]["post"]["marketplace_details"] = {"price_in_cents": 0, "category": {"title": "Möbel"}}
+    assert _extract_from_api_page(page) == []
+
+
+def test_free_verschenken_category_skipped():
+    page = [_free_post()]
+    page[0]["post"]["marketplace_details"] = {"price_in_cents": 100, "category": {"title": "Zu verschenken"}}
+    assert _extract_from_api_page(page) == []
+
+
+def test_paid_listing_kept():
+    page = [_free_post(content_type="marketplace")]
+    page[0]["post"]["marketplace_details"] = {"price_in_cents": 2500, "category": {"title": "Möbel"}}
+    listings = _extract_from_api_page(page)
+    assert len(listings) == 1
+    assert listings[0]["price"] == "25 €"
+
+
+def test_is_free_listing_unit():
+    assert _is_free_listing({"content_type": "marketplace_free"}, {}) is True
+    assert _is_free_listing({}, {"price_in_cents": 0}) is True
+    assert _is_free_listing({}, {"category": {"title": "Zu verschenken"}}) is True
+    assert _is_free_listing({}, {"price_in_cents": 5000}) is False
+    assert _is_free_listing({}, {}) is False

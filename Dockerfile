@@ -22,6 +22,6 @@ RUN mkdir -p data cookies logs
 
 EXPOSE 8000
 
-# Start virtual display then run app
-CMD Xvfb :99 -screen 0 1280x1024x24 -ac +extension GLX +render -noreset &> /dev/null & \
-    sleep 1 && DISPLAY=:99 python web.py
+# Start virtual display then run app (sh-compatible redirect).
+# `exec` replaces sh with python so SIGTERM reaches uvicorn (graceful stop).
+CMD sh -c "Xvfb :99 -screen 0 1280x1024x24 -ac +extension GLX +render -noreset > /dev/null 2>&1 & sleep 1 && exec DISPLAY=:99 python web.py"

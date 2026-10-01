@@ -4,7 +4,7 @@
     "builder": "DOCKERFILE"
   },
   "deploy": {
-    "startCommand": "Xvfb :99 -screen 0 1280x1024x24 -ac +extension GLX +render -noreset &>/dev/null & sleep 1 && DISPLAY=:99 python web.py",
+    "startCommand": "Xvfb :99 -screen 0 1280x1024x24 -ac +extension GLX +render -noreset >/dev/null 2>&1 & sleep 1 && exec DISPLAY=:99 python web.py",
     "healthcheckPath": "/api/stats",
     "healthcheckTimeout": 30,
     "restartPolicyType": "ON_FAILURE",

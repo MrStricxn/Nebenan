@@ -1,7 +1,8 @@
 import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
-from playwright.async_api import async_playwright
+
+from src.http import api_request_ex
 
 log = logging.getLogger("nebena")
 
@@ -27,8 +28,27 @@ def _is_within_hours(published_at: str, hours: int) -> bool:
         return False
 
 
+def _is_free_listing(post: dict, md: dict) -> bool:
+    """Zu verschenken / free giveaways — user doesn't want these parsed."""
+    if (post.get("content_type") or "").lower() == "marketplace_free":
+        return True
+    raw_price = md.get("price_in_cents")
+    if raw_price is not None:
+        try:
+            if int(raw_price) == 0:
+                return True
+        except (TypeError, ValueError):
+            pass
+    cat = md.get("category") or {}
+    title = cat.get("title") if isinstance(cat, dict) else cat
+    if "verschenk" in (title or "").lower():
+        return True
+    return False
+
+
 def _extract_from_api_page(page_items: list[dict]) -> list[dict]:
     results = []
+    skipped_free = 0
     for item in page_items:
         try:
             post = item["post"]
@@ -37,6 +57,9 @@ def _extract_from_api_page(page_items: list[dict]) -> list[dict]:
             seller_id = gid.split("/")[-1]
 
             md    = post.get("marketplace_details") or {}
+            if _is_free_listing(post, md):
+                skipped_free += 1
+                continue
             cat   = md.get("category") or {}
             price_cents = md.get("price_in_cents")
             price = f"{price_cents / 100:.0f} €" if price_cents else ""
@@ -57,6 +80,8 @@ def _extract_from_api_page(page_items: list[dict]) -> list[dict]:
             })
         except (KeyError, TypeError):
             continue
+    if skipped_free:
+        log.info(f"пропущено бесплатных (Zu verschenken): {skipped_free}")
     return results
 
 
@@ -83,61 +108,61 @@ async def _fetch_account_listings(
     listings: list[dict] = []
 
     async with semaphore:
-        async with async_playwright() as pw:
-            request_ctx = await pw.request.new_context(extra_http_headers=headers)
-            after    = None
-            page_num = 0
+        after    = None
+        page_num = 0
 
-            while True:
-                url = f"{_API_POSTS}?categories=&limit=24"
-                if after:
-                    url += f"&after={after}"
+        while True:
+            url = f"{_API_POSTS}?categories=&limit=24"
+            if after:
+                url += f"&after={after}"
 
-                response = await request_ctx.get(url)
-                if response.status != 200:
-                    log.warning(f"[{account_name}] API статус {response.status} — стоп")
-                    break
+            # Via api_request_ex: timeouts + non-2xx also feed ban detection.
+            data, status, _txt = await api_request_ex(
+                "GET", url, auth_token, account_name=account_name,
+                extra_headers={
+                    "accept":          "application/json",
+                    "accept-language": "de",
+                    "user-agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                })
+            if not isinstance(data, dict):
+                log.warning(f"[{account_name}] API статус {status} — стоп")
+                break
+            page_items = data.get("page") or []
+            page_info  = data.get("page_info") or {}
+            page_num  += 1
 
-                data       = await response.json()
-                page_items = data.get("page") or []
-                page_info  = data.get("page_info") or {}
-                page_num  += 1
+            if not page_items:
+                log.info(f"[{account_name}] стр.{page_num}: пустая страница")
+                break
 
-                if not page_items:
-                    log.info(f"[{account_name}] стр.{page_num}: пустая страница")
-                    break
+            # Extract all items, filter by date — NO early break mid-page
+            # (promoted/boosted listings can appear out of order)
+            page_extracted = _extract_from_api_page(page_items)
+            in_window = [l for l in page_extracted if _is_within_hours(l["published_at"], hours)]
+            listings.extend(in_window)
 
-                # Extract all items, filter by date — NO early break mid-page
-                # (promoted/boosted listings can appear out of order)
-                page_extracted = _extract_from_api_page(page_items)
-                in_window = [l for l in page_extracted if _is_within_hours(l["published_at"], hours)]
-                listings.extend(in_window)
+            log.info(
+                f"[{account_name}] стр.{page_num}: "
+                f"{len(page_items)} сырых → {len(page_extracted)} извлечено → "
+                f"{len(in_window)} в окне {hours}ч"
+            )
 
-                log.info(
-                    f"[{account_name}] стр.{page_num}: "
-                    f"{len(page_items)} сырых → {len(page_extracted)} извлечено → "
-                    f"{len(in_window)} в окне {hours}ч"
-                )
+            if progress:
+                for _ in in_window:
+                    progress.advance(progress.task_ids[0])
 
-                if progress:
-                    for _ in in_window:
-                        progress.advance(progress.task_ids[0])
+            # Stop pagination when the oldest item on this page is outside the window
+            # (listings can be out of order → use min over the whole page)
+            dates = [l["published_at"] for l in page_extracted if l["published_at"]]
+            if dates and not _is_within_hours(min(dates), hours):
+                break
 
-                # Stop pagination when the oldest item on this page is outside the window
-                # (all remaining pages will be even older)
-                if page_extracted:
-                    oldest = page_extracted[-1]["published_at"]
-                    if not _is_within_hours(oldest, hours):
-                        break
+            if not page_info.get("has_next_page"):
+                break
 
-                if not page_info.get("has_next_page"):
-                    break
-
-                after = page_info.get("end_cursor")
-                if not after:
-                    break
-
-            await request_ctx.dispose()
+            after = page_info.get("end_cursor")
+            if not after:
+                break
 
     log.info(f"[{account_name}] итого {len(listings)} объявлений ({page_num} стр.)")
     return listings

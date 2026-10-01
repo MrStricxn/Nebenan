@@ -6,3 +6,4 @@ data/nebena.db
 logs/*.log
 cookies/*.json
 .env
+logins.json

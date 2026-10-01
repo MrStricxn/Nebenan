@@ -3,81 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEbena</title>
+<title>Nebenan.de</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:    #05070E;
-  --s0:    #090C18;
-  --s1:    #0D1121;
-  --s2:    #12172B;
-  --bd:    #19203A;
-  --bd2:   #202844;
-  --am:    #E8A020;
-  --am10:  rgba(232,160,32,.10);
-  --am20:  rgba(232,160,32,.20);
-  --bl:    #4B6CF7;
-  --bl10:  rgba(75,108,247,.10);
-  --gn:    #22C55E;
-  --gn10:  rgba(34,197,94,.10);
-  --rd:    #EF4444;
-  --rd10:  rgba(239,68,68,.10);
-  --yw:    #F59E0B;
-  --t1:    #E4E8F4;
-  --t2:    #566080;
-  --t3:    #232C45;
-  --r:     8px;
+  --bg:    #05070D;
+  --s0:    #0A0E1A;
+  --s1:    #0E1322;
+  --s2:    #151B30;
+  --bd:    rgba(148,163,216,.12);
+  --bd2:   rgba(148,163,216,.24);
+  --am:    #F0A92E;
+  --am-hi: #FFC85C;
+  --am10:  rgba(240,169,46,.10);
+  --am20:  rgba(240,169,46,.20);
+  --bl:    #5B7CFF;
+  --bl10:  rgba(91,124,255,.12);
+  --gn:    #2BD97C;
+  --gn10:  rgba(43,217,124,.12);
+  --rd:    #F2555A;
+  --rd10:  rgba(242,85,90,.12);
+  --yw:    #F5B83D;
+  --t1:    #E9EDF7;
+  --t2:    #8B94AD;
+  --t3:    #3D4663;
+  --r:     12px;
+  --r-sm:  8px;
   --mono:  'JetBrains Mono', monospace;
-  --sh:    0 2px 12px rgba(0,0,0,.4);
-  --sh-sm: 0 1px 4px rgba(0,0,0,.3);
+  --sh:    0 10px 30px rgba(0,0,0,.45);
+  --sh-sm: 0 2px 10px rgba(0,0,0,.35);
+  --grad:  linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0) 42%);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
 html, body { height: 100%; background: var(--bg); color: var(--t1); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.5 }
 a { text-decoration: none; color: inherit }
 button { font-family: inherit; cursor: pointer; border: none; outline: none }
 input, select, textarea { font-family: inherit; outline: none }
-::-webkit-scrollbar { width: 4px; height: 4px }
+::-webkit-scrollbar { width: 8px; height: 8px }
 ::-webkit-scrollbar-track { background: transparent }
-::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 4px }
+::-webkit-scrollbar-thumb { background: var(--s2); border-radius: 8px; border: 2px solid var(--bg) }
+::-webkit-scrollbar-thumb:hover { background: var(--t3) }
 
-/* ── Topbar ── */
-.topbar {
-  position: fixed; top: 0; left: 0; right: 0; height: 54px;
-  background: var(--s0); border-bottom: 1px solid var(--bd);
-  display: flex; align-items: center; padding: 0 22px; gap: 0; z-index: 200;
-  overflow: hidden;
+/* ── App shell: sidebar + slim topbar ── */
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0; width: 248px; z-index: 200;
+  background: linear-gradient(180deg, #0B0F1E, #080B15);
+  border-right: 1px solid var(--bd);
+  display: flex; flex-direction: column; padding: 18px 14px 14px; overflow-y: auto;
 }
 .brand {
-  font-size: 15px; font-weight: 700; letter-spacing: .4px;
-  color: var(--am); margin-right: 28px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  font-size: 16px; font-weight: 700; letter-spacing: .4px;
+  color: var(--t1); padding: 2px 12px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
 }
 .brand-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--am);
-  box-shadow: 0 0 10px var(--am), 0 0 4px var(--am);
+  width: 9px; height: 9px; border-radius: 50%; background: var(--am);
+  box-shadow: 0 0 12px var(--am), 0 0 4px var(--am); flex-shrink: 0;
 }
-.topnav { display: flex; align-items: center; gap: 1px; flex: 1 }
+.brand small { font-size: 10px; font-weight: 600; color: var(--t3); letter-spacing: 1.2px; margin-left: auto }
+.nav-group-label {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .9px;
+  color: var(--t3); padding: 14px 12px 6px;
+}
+.topnav { display: flex; flex-direction: column; gap: 2px; list-style: none }
 .topnav a {
-  padding: 6px 13px; border-radius: var(--r); color: var(--t2); font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 11px;
+  padding: 8px 12px; border-radius: var(--r-sm); color: var(--t2); font-size: 13.5px; font-weight: 500;
   transition: color .15s, background .15s; white-space: nowrap; position: relative;
 }
 .topnav a:hover  { color: var(--t1); background: var(--s1) }
 .topnav a.active { color: var(--am); background: var(--am10) }
+.topnav a.active::before {
+  content: ''; position: absolute; left: -14px; top: 8px; bottom: 8px; width: 3px;
+  border-radius: 0 3px 3px 0; background: var(--am); box-shadow: 0 0 8px var(--am);
+}
+.nav-ico { width: 20px; text-align: center; font-size: 15px; flex-shrink: 0 }
+.sidebar-foot {
+  margin-top: auto; padding: 12px; background: var(--s1); border: 1px solid var(--bd);
+  border-radius: var(--r-sm); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
+}
+.topbar {
+  position: fixed; top: 0; left: 248px; right: 0; height: 56px;
+  background: rgba(5,7,13,.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; padding: 0 24px; gap: 12px; z-index: 190;
+  overflow: hidden;
+}
+.topbar-title { font-size: 14px; font-weight: 600; color: var(--t1); display: flex; align-items: center; gap: 10px }
+.topbar-title .crumb { color: var(--t3); font-weight: 500 }
+.menu-btn {
+  display: none; background: var(--s1); border: 1px solid var(--bd); color: var(--t2);
+  border-radius: var(--r-sm); padding: 6px 10px; font-size: 15px;
+}
+.menu-btn:hover { color: var(--t1) }
 .nav-badge {
   display: inline-flex; align-items: center; justify-content: center;
-  background: var(--rd); color: #fff; font-size: 9.5px; font-weight: 700;
-  min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px;
-  vertical-align: middle; margin-left: 4px; line-height: 1;
+  background: var(--rd); color: #fff; font-size: 10px; font-weight: 700;
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 10px;
+  vertical-align: middle; margin-left: auto; line-height: 1;
 }
 .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: auto }
-.ws-indicator  { display: flex; align-items: center; gap: 6px; color: var(--t2); font-size: 12px }
+.ws-indicator  { display: flex; align-items: center; gap: 7px; color: var(--t2); font-size: 12px }
 .ws-dot {
   width: 7px; height: 7px; border-radius: 50%; background: var(--t3);
   transition: background .3s, box-shadow .3s;
 }
 .ws-dot.on   { background: var(--gn); box-shadow: 0 0 7px var(--gn) }
-.ws-dot.busy { background: var(--am); box-shadow: 0 0 7px var(--am) }
+.ws-dot.busy { background: var(--am); box-shadow: 0 0 7px var(--am); animation: pulse 1.2s infinite }
 #task-label  { font-size: 12px; color: var(--t2) }
+@media (max-width: 920px) {
+  .sidebar { transform: translateX(-100%); transition: transform .25s cubic-bezier(.4,0,.2,1) }
+  .sidebar.open { transform: none; box-shadow: var(--sh) }
+  .topbar { left: 0 }
+  .menu-btn { display: inline-flex }
+}
 
 /* Progress bar */
 .topbar-progress {
@@ -96,16 +135,21 @@ input, select, textarea { font-family: inherit; outline: none }
 @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }
 
 /* ── Layout ── */
-.content { margin-top: 54px; min-height: calc(100vh - 54px); padding: 28px 28px 48px; transition: opacity .12s ease }
-.content.chat-mode { padding: 0; overflow: hidden }
+.content { margin: 56px 0 0 248px; min-height: calc(100vh - 56px); padding: 28px 30px 48px; transition: opacity .12s ease; max-width: 1460px }
+.content.chat-mode { padding: 0; overflow: hidden; max-width: none }
 .page { display: none }
-.page.active { display: block }
-#page-chat.active { display: flex; flex-direction: column; height: calc(100vh - 54px) }
+.page.active { display: block; animation: pageIn .18s ease }
+@keyframes pageIn { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform: none } }
+#page-chat.active { display: flex; flex-direction: column; height: calc(100vh - 56px) }
+@media (max-width: 920px) {
+  .content { margin-left: 0; padding: 20px 16px 40px }
+  .stat-grid { grid-template-columns: repeat(2, 1fr) }
+}
 
 /* ── Page header ── */
-.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px }
-.page-title  { font-size: 20px; font-weight: 700; color: var(--t1) }
-.page-sub    { font-size: 12.5px; color: var(--t2); margin-top: 3px }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 26px }
+.page-title  { font-size: 22px; font-weight: 700; color: var(--t1); letter-spacing: -.2px }
+.page-sub    { font-size: 13px; color: var(--t2); margin-top: 4px }
 
 /* ── Skeleton ── */
 .skeleton {
@@ -131,12 +175,21 @@ input, select, textarea { font-family: inherit; outline: none }
 /* ── Stat cards ── */
 .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px }
 .stat-card {
-  background: var(--s0); border: 1px solid var(--bd); border-radius: var(--r);
+  background: var(--s0); background-image: var(--grad);
+  border: 1px solid var(--bd); border-radius: var(--r);
   padding: 18px 20px; position: relative; overflow: hidden; box-shadow: var(--sh-sm);
+  transition: transform .15s ease, border-color .15s, box-shadow .15s;
 }
+.stat-card:hover { transform: translateY(-2px); border-color: var(--bd2); box-shadow: var(--sh) }
 .stat-card::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-  background: var(--accent-color, var(--am));
+  background: linear-gradient(180deg, var(--accent-color, var(--am)), transparent 130%);
+}
+.stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px }
+.stat-top .stat-label { margin-bottom: 0 }
+.stat-ico {
+  width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; background: var(--s2); border: 1px solid var(--bd); flex-shrink: 0;
 }
 .stat-card.blue  { --accent-color: var(--bl) }
 .stat-card.green { --accent-color: var(--gn) }
@@ -146,25 +199,26 @@ input, select, textarea { font-family: inherit; outline: none }
 .stat-sub   { font-size: 11.5px; color: var(--t3); margin-top: 7px }
 
 /* ── Cards ── */
-.card { background: var(--s0); border: 1px solid var(--bd); border-radius: var(--r); overflow: hidden; margin-bottom: 16px; box-shadow: var(--sh-sm) }
+.card { background: var(--s0); background-image: var(--grad); border: 1px solid var(--bd); border-radius: var(--r); overflow: hidden; margin-bottom: 16px; box-shadow: var(--sh-sm) }
 .card-head {
-  padding: 13px 18px; border-bottom: 1px solid var(--bd);
-  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.card-title { font-size: 12.5px; font-weight: 600; color: var(--t1); text-transform: uppercase; letter-spacing: .4px }
-.card-body  { padding: 18px }
+.card-title { font-size: 12px; font-weight: 700; color: var(--t1); text-transform: uppercase; letter-spacing: .8px; display: flex; align-items: center; gap: 8px }
+.card-title::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--am) }
+.card-body  { padding: 20px }
 .card-body.no-pad { padding: 0 }
 
 /* ── Tables ── */
 .tbl { width: 100%; border-collapse: collapse; font-size: 13px }
 .tbl th {
-  padding: 9px 14px; text-align: left; font-size: 10.5px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: .5px; color: var(--t2);
-  border-bottom: 1px solid var(--bd); background: var(--s1);
+  padding: 10px 14px; text-align: left; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .7px; color: var(--t2);
+  border-bottom: 1px solid var(--bd); background: rgba(255,255,255,.015);
 }
-.tbl td { padding: 10px 14px; border-bottom: 1px solid var(--bd); color: var(--t1) }
+.tbl td { padding: 11px 14px; border-bottom: 1px solid var(--bd); color: var(--t1); transition: background .12s }
 .tbl tr:last-child td { border-bottom: none }
-.tbl tbody tr:hover td { background: var(--s1) }
+.tbl tbody tr:hover td { background: rgba(255,255,255,.02) }
 
 /* Queue tooltip */
 .tbl-row-wrap { position: relative }
@@ -179,22 +233,25 @@ input, select, textarea { font-family: inherit; outline: none }
 .qt-row   { color: var(--t2); margin-top: 3px }
 .qt-link  { color: var(--bl); font-size: 11px; word-break: break-all; margin-top: 6px; display: block }
 
-.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 500 }
-.badge-sent { background: var(--gn10); color: var(--gn) }
-.badge-wait { background: var(--am10); color: var(--am) }
-.badge-new  { background: var(--bl10); color: var(--bl) }
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 600; border: 1px solid transparent }
+.badge-sent { background: var(--gn10); color: var(--gn); border-color: rgba(43,217,124,.25) }
+.badge-wait { background: var(--am10); color: var(--am); border-color: rgba(240,169,46,.25) }
+.badge-new  { background: var(--bl10); color: var(--bl); border-color: rgba(91,124,255,.25) }
 .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; display: inline-block }
 
 /* ── Buttons ── */
 .btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 8px 16px; border-radius: var(--r); font-size: 13px; font-weight: 500;
-  transition: opacity .15s, background .15s, transform .1s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 8px 16px; border-radius: var(--r-sm); font-size: 13px; font-weight: 600;
+  transition: opacity .15s, background .15s, transform .1s, box-shadow .15s, border-color .15s;
 }
 .btn:active:not(:disabled) { transform: scale(.97) }
 .btn:disabled { opacity: .4; cursor: not-allowed }
-.btn-primary   { background: var(--am); color: #000 }
-.btn-primary:hover:not(:disabled) { background: #D4911C }
+.btn:focus-visible, .topnav a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--am); outline-offset: 2px;
+}
+.btn-primary   { background: linear-gradient(180deg, var(--am-hi), var(--am)); color: #1A1206; box-shadow: 0 2px 12px rgba(240,169,46,.25) }
+.btn-primary:hover:not(:disabled) { box-shadow: 0 4px 18px rgba(240,169,46,.4); filter: brightness(1.06) }
 .btn-secondary { background: var(--s1); color: var(--t1); border: 1px solid var(--bd) }
 .btn-secondary:hover:not(:disabled) { background: var(--s2); border-color: var(--bd2) }
 .btn-blue   { background: var(--bl); color: #fff }
@@ -208,10 +265,10 @@ input, select, textarea { font-family: inherit; outline: none }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px }
 .field label { display: block; font-size: 11.5px; font-weight: 600; color: var(--t2); margin-bottom: 6px; letter-spacing: .3px; text-transform: uppercase }
 .field input, .field select {
-  width: 100%; background: var(--s1); border: 1px solid var(--bd); border-radius: var(--r);
-  color: var(--t1); padding: 8px 12px; font-size: 13.5px; transition: border .15s;
+  width: 100%; background: var(--s1); border: 1px solid var(--bd); border-radius: var(--r-sm);
+  color: var(--t1); padding: 9px 12px; font-size: 13.5px; transition: border-color .15s, box-shadow .15s;
 }
-.field input:focus, .field select:focus { border-color: var(--am) }
+.field input:focus, .field select:focus { border-color: var(--am); box-shadow: 0 0 0 3px var(--am10) }
 .field-note { font-size: 11px; color: var(--t3); margin-top: 5px }
 .section-label {
   font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px;
@@ -222,9 +279,12 @@ input, select, textarea { font-family: inherit; outline: none }
 /* ── Account cards ── */
 .acct-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px }
 .acct-card {
-  background: var(--s0); border: 1px solid var(--bd); border-radius: var(--r);
-  padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--sh-sm);
+  background: var(--s0); background-image: var(--grad);
+  border: 1px solid var(--bd); border-radius: var(--r);
+  padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--sh-sm);
+  transition: border-color .15s, transform .15s, box-shadow .15s;
 }
+.acct-card:hover { border-color: var(--bd2); transform: translateY(-2px); box-shadow: var(--sh) }
 .acct-top    { display: flex; align-items: center; gap: 12px }
 .acct-avatar {
   width: 38px; height: 38px; border-radius: 50%; background: var(--s2);
@@ -232,13 +292,15 @@ input, select, textarea { font-family: inherit; outline: none }
 }
 .acct-name   { font-size: 13.5px; font-weight: 600; color: var(--t1); word-break: break-all }
 .status-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 9px; border-radius: 4px; font-size: 11.5px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 600;
+  border: 1px solid transparent;
 }
 .status-ok  { background: var(--gn10); color: var(--gn) }
 .status-err { background: var(--rd10); color: var(--rd) }
 .status-unk { background: var(--s2);   color: var(--t2) }
 .status-chk { background: var(--am10); color: var(--am) }
+.status-warn{ background: var(--am10); color: var(--am); border: 1px dashed var(--am) }
 .acct-dot   { width: 6px; height: 6px; border-radius: 50%; background: currentColor }
 
 /* ── Dashboard activity ── */
@@ -256,12 +318,17 @@ input, select, textarea { font-family: inherit; outline: none }
 /* ── Quick actions ── */
 .quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 12px; margin-bottom: 24px }
 .quick-card {
-  background: var(--s0); border: 1px solid var(--bd); border-radius: var(--r);
-  padding: 16px 18px; cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s;
+  background: var(--s0); background-image: var(--grad);
+  border: 1px solid var(--bd); border-radius: var(--r);
+  padding: 18px; cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s, transform .15s;
   display: flex; flex-direction: column; gap: 6px; box-shadow: var(--sh-sm);
 }
-.quick-card:hover { border-color: var(--am); background: var(--am10) }
-.quick-icon { font-size: 22px; line-height: 1; margin-bottom: 2px }
+.quick-card:hover { border-color: rgba(240,169,46,.5); background: var(--am10); transform: translateY(-2px); box-shadow: var(--sh) }
+.quick-icon {
+  width: 38px; height: 38px; border-radius: 11px; background: var(--s2); border: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; line-height: 1; margin-bottom: 6px;
+}
 .quick-name { font-size: 13px; font-weight: 600; color: var(--t1) }
 .quick-desc { font-size: 11.5px; color: var(--t2) }
 
@@ -275,10 +342,12 @@ input, select, textarea { font-family: inherit; outline: none }
 
 /* ── Log Drawer ── */
 .log-drawer {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
-  background: var(--s0); border-top: 1px solid var(--bd);
+  position: fixed; bottom: 0; left: 248px; right: 0; z-index: 300;
+  background: rgba(10,14,26,.96); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--bd);
   transform: translateY(100%); transition: transform .25s cubic-bezier(.4,0,.2,1);
 }
+@media (max-width: 920px) { .log-drawer { left: 0 } }
 .log-drawer.show { transform: translateY(0) }
 .log-drawer-head {
   display: flex; align-items: center; justify-content: space-between;
@@ -305,11 +374,12 @@ input, select, textarea { font-family: inherit; outline: none }
 .log-text.debug   { color: var(--t3) }
 
 /* ── Toast ── */
-.toast-wrap { position: fixed; top: 64px; right: 16px; z-index: 500; display: flex; flex-direction: column; gap: 8px }
+.toast-wrap { position: fixed; top: 68px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 8px }
 .toast {
-  background: var(--s1); border: 1px solid var(--bd); border-radius: var(--r);
-  padding: 10px 14px; font-size: 13px; color: var(--t1); min-width: 200px;
-  animation: toastIn .2s ease; box-shadow: var(--sh);
+  background: rgba(14,19,34,.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--bd); border-radius: var(--r-sm);
+  padding: 11px 15px; font-size: 13px; color: var(--t1); min-width: 220px; max-width: 340px;
+  animation: toastIn .22s cubic-bezier(.2,.9,.3,1.2); box-shadow: var(--sh);
 }
 .toast.ok  { border-left: 3px solid var(--gn) }
 .toast.err { border-left: 3px solid var(--rd) }
@@ -355,6 +425,13 @@ input, select, textarea { font-family: inherit; outline: none }
   transition: color .15s, border-color .15s;
 }
 .chat-refresh-btn:hover { color: var(--am); border-color: var(--am) }
+.conv-more-btn {
+  margin: 8px 10px 10px; padding: 7px; border-radius: 8px; font-size: 12.5px; cursor: pointer;
+  background: var(--s1); border: 1px solid var(--bd); color: var(--t2);
+  transition: color .15s, border-color .15s;
+}
+.conv-more-btn:hover:not(:disabled) { color: var(--am); border-color: var(--am) }
+.conv-more-btn:disabled { opacity: .6; cursor: default }
 .chat-search { padding: 8px 10px; border-bottom: 1px solid var(--bd); position: relative }
 .chat-search input {
   width: 100%; background: var(--s1); border: 1px solid var(--bd);
@@ -458,13 +535,14 @@ input, select, textarea { font-family: inherit; outline: none }
 .msg-avatar img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover }
 .msg-body-wrap { display: flex; flex-direction: column; min-width: 0 }
 .msg-bubble {
-  background: var(--s2); border: 1px solid var(--bd); border-radius: 0 12px 12px 12px;
-  padding: 9px 14px; font-size: 13.5px; color: var(--t1); line-height: 1.55;
-  word-break: break-word;
+  background: var(--s2); border: 1px solid var(--bd); border-radius: 4px 14px 14px 14px;
+  padding: 10px 15px; font-size: 13.5px; color: var(--t1); line-height: 1.55;
+  word-break: break-word; box-shadow: var(--sh-sm);
 }
 .msg-row.me .msg-bubble {
-  background: var(--am20); border-color: var(--am20);
-  border-radius: 12px 0 12px 12px;
+  background: linear-gradient(180deg, rgba(240,169,46,.28), rgba(240,169,46,.18));
+  border-color: rgba(240,169,46,.4);
+  border-radius: 14px 4px 14px 14px;
 }
 .msg-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap }
 .msg-time  { font-size: 10.5px; color: var(--t3) }
@@ -541,6 +619,7 @@ input, select, textarea { font-family: inherit; outline: none }
 }
 .autotl-btn:hover  { color: var(--t1); border-color: var(--bd2) }
 .autotl-btn.on     { color: var(--gn); border-color: var(--gn); background: var(--gn10) }
+.btn-chat-send.confirm { background: linear-gradient(135deg, var(--gn), #2ea36b); box-shadow: 0 0 0 2px var(--gn10) }
 
 /* ── Quick-reply strip ── */
 .qr-strip {
@@ -593,24 +672,38 @@ input, select, textarea { font-family: inherit; outline: none }
 </head>
 <body>
 
-<!-- ── Topbar ── -->
-<nav class="topbar">
-  <div class="brand"><span class="brand-dot"></span>NEbena</div>
+<!-- ── Sidebar ── -->
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><span class="brand-dot"></span>Nebenan.de<small>DASHBOARD</small></div>
+  <div class="nav-group-label">Работа</div>
   <ul class="topnav" id="topnav">
-    <li><a href="#" class="active" data-page="dashboard">Дашборд</a></li>
-    <li><a href="#" data-page="parser">Парсер</a></li>
-    <li><a href="#" data-page="sender">Рассылка</a></li>
-    <li><a href="#" data-page="chat">Чат<span class="nav-badge" id="nav-badge-chat" style="display:none">0</span></a></li>
-    <li><a href="#" data-page="inbox">Входящие</a></li>
-    <li><a href="#" data-page="accounts">Аккаунты</a></li>
-    <li><a href="#" data-page="scheduler">Планировщик</a></li>
-    <li><a href="#" data-page="settings">Настройки</a></li>
+    <li><a href="#" class="active" data-page="dashboard"><span class="nav-ico">📊</span>Дашборд</a></li>
+    <li><a href="#" data-page="parser"><span class="nav-ico">🔍</span>Парсер</a></li>
+    <li><a href="#" data-page="sender"><span class="nav-ico">📨</span>Рассылка</a></li>
+    <li><a href="#" data-page="links"><span class="nav-ico">🔗</span>Ссылки</a></li>
+    <li><a href="#" data-page="chat"><span class="nav-ico">💬</span>Чат<span class="nav-badge" id="nav-badge-chat" style="display:none">0</span></a></li>
+    <li><a href="#" data-page="inbox"><span class="nav-ico">📥</span>Входящие</a></li>
   </ul>
-  <div class="topbar-right">
+  <div class="nav-group-label">Система</div>
+  <ul class="topnav">
+    <li><a href="#" data-page="accounts"><span class="nav-ico">👤</span>Аккаунты</a></li>
+    <li><a href="#" data-page="scheduler"><span class="nav-ico">🗓</span>Планировщик</a></li>
+    <li><a href="#" data-page="settings"><span class="nav-ico">⚙️</span>Настройки</a></li>
+  </ul>
+  <div class="sidebar-foot">
     <div class="ws-indicator">
       <span class="ws-dot" id="ws-dot"></span>
       <span id="task-label">Подключение...</span>
     </div>
+  </div>
+</aside>
+
+<!-- ── Topbar ── -->
+<nav class="topbar">
+  <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div class="topbar-title"><span class="crumb">Nebenan.de</span><span style="color:var(--t3)">/</span><span id="topbar-page">Дашборд</span></div>
+  <div class="topbar-right">
+    <button class="btn btn-secondary btn-sm" onclick="refreshAll()">↺ Обновить</button>
   </div>
   <div class="topbar-progress" id="topbar-progress"></div>
 </nav>
@@ -626,22 +719,22 @@ input, select, textarea { font-family: inherit; outline: none }
     </div>
     <div class="stat-grid">
       <div class="stat-card">
-        <div class="stat-label">Объявлений</div>
+        <div class="stat-top"><div class="stat-label">Объявлений</div><div class="stat-ico">🏷️</div></div>
         <div class="stat-val" id="st-listings">—</div>
         <div class="stat-sub">в базе</div>
       </div>
       <div class="stat-card blue">
-        <div class="stat-label">Продавцы</div>
+        <div class="stat-top"><div class="stat-label">Продавцы</div><div class="stat-ico">👥</div></div>
         <div class="stat-val" id="st-sellers">—</div>
         <div class="stat-sub">уникальных</div>
       </div>
       <div class="stat-card green">
-        <div class="stat-label">Отправлено</div>
+        <div class="stat-top"><div class="stat-label">Отправлено</div><div class="stat-ico">✉️</div></div>
         <div class="stat-val" id="st-sent">—</div>
         <div class="stat-sub">сообщений</div>
       </div>
       <div class="stat-card red">
-        <div class="stat-label">Ответили</div>
+        <div class="stat-top"><div class="stat-label">Ответили</div><div class="stat-ico">💬</div></div>
         <div class="stat-val" id="st-replied">—</div>
         <div class="stat-sub" id="st-queue-sub">в очереди: —</div>
       </div>
@@ -753,6 +846,39 @@ input, select, textarea { font-family: inherit; outline: none }
     </div>
   </div>
 
+  <!-- LINKS -->
+  <div class="page" id="page-links">
+    <div class="page-header">
+      <div><div class="page-title">Ссылки</div><div class="page-sub">Генерация через Lumma + Shlepock API</div></div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head">
+        <span class="card-title">Новая ссылка</span>
+        <span class="text-muted text-sm" id="links-config"></span>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;gap:8px">
+          <div class="field" style="flex:1;margin:0"><input id="links-url" type="text" placeholder="https://www.kleinanzeigen.de/… или https://www.markt.de/…" onkeydown="if(event.key==='Enter')generateLink()"></div>
+          <button class="btn btn-primary" id="links-btn" onclick="generateLink()">⚡ Создать</button>
+        </div>
+        <div class="text-muted text-sm" style="margin-top:8px">nebenan.de API не принимает — поддерживаются: markt.de, kleinanzeigen.de, vinted, wallapop</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Результат</span></div>
+      <div class="card-body" id="links-results">
+        <div class="empty-state"><div class="empty-icon">🔗</div><div class="empty-title">Вставьте ссылку на объявление и нажмите «Создать»</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-head">
+        <span class="card-title">История</span>
+        <button class="btn btn-secondary" onclick="clearLinksHistory()">Очистить</button>
+      </div>
+      <div class="card-body no-pad"><table class="tbl"><tbody id="links-history-tbody"></tbody></table></div>
+    </div>
+  </div>
+
   <!-- CHAT -->
   <div class="page" id="page-chat">
     <div class="chat-wrap">
@@ -771,6 +897,7 @@ input, select, textarea { font-family: inherit; outline: none }
         <div class="conv-list" id="conv-list">
           <div class="chat-empty">Выберите аккаунт</div>
         </div>
+        <button class="conv-more-btn" id="conv-more-btn" onclick="loadMoreConversations()" style="display:none">Показать ещё ↓</button>
       </div>
 
       <div class="chat-main">
@@ -797,7 +924,8 @@ input, select, textarea { font-family: inherit; outline: none }
               <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="onPhotosSelected(this)">
               <textarea class="compose-textarea" id="compose-text" rows="1" placeholder="Написать сообщение..."
                 onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"
-                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,180)+'px'"></textarea>
+                oninput="_ruDeConfirmed=false;syncSendBtn();this.style.height='auto';this.style.height=Math.min(this.scrollHeight,180)+'px'"></textarea>
+              <button class="autotl-btn" id="rude-btn" onclick="toggleRuDeSend()" title="Переводить RU→DE перед отправкой">RU→DE</button>
               <button class="btn-chat-send" id="btn-chat-send" onclick="sendChatMessage()">➤</button>
             </div>
           </div>
@@ -835,6 +963,28 @@ input, select, textarea { font-family: inherit; outline: none }
     <div class="page-header">
       <div><div class="page-title">Аккаунты</div><div class="page-sub">Статус и верификация токенов</div></div>
       <button class="btn btn-primary" id="btn-check-accts" onclick="checkAccounts()">▶ Проверить все</button>
+    </div>
+    <div class="card" style="max-width:640px;margin-bottom:16px">
+      <div class="card-head"><span class="card-title">➕ Добавить аккаунты</span></div>
+      <div class="card-body">
+        <input type="file" id="cookie-files" accept=".json,application/json" multiple>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn btn-primary" id="btn-upload-cookies" onclick="uploadCookies()">⤒ Загрузить</button>
+        </div>
+        <div id="cookie-upload-result" class="text-muted text-sm" style="margin-top:8px;line-height:1.8"></div>
+        <div class="field-note">JSON из EditThisCookie — можно выбрать несколько файлов сразу</div>
+      </div>
+    </div>
+    <div class="card" style="max-width:640px;margin-bottom:16px">
+      <div class="card-head"><span class="card-title">🔑 Массовый вход по логину и паролю</span></div>
+      <div class="card-body">
+        <textarea id="bulk-creds" rows="6" style="width:100%;box-sizing:border-box" placeholder="email:пароль — по одному на строку"></textarea>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn btn-primary" id="btn-bulk-login" onclick="bulkLogin()">▶ Войти и добавить</button>
+        </div>
+        <div id="bulk-login-result" class="text-muted text-sm" style="margin-top:8px;line-height:1.8"></div>
+        <div class="field-note">Входы идут по очереди в фоне, прогресс — в логах. Успешные сохраняют куки + автологин.</div>
+      </div>
     </div>
     <div class="acct-grid" id="acct-grid">
       <div class="text-muted text-sm">Загрузка...</div>
@@ -929,11 +1079,35 @@ input, select, textarea { font-family: inherit; outline: none }
         </div>
       </div>
       <div class="settings-section">
+        <div class="section-label">Автологин (login:pass)</div>
+        <div class="text-muted text-sm" style="line-height:1.9;margin-bottom:12px">
+          Когда куки аккаунта истекают, софт сам перелогинивается по сохранённому
+          логину и паролю. Пароли хранятся только на сервере и никогда не отдаются наружу.
+        </div>
+        <div id="cred-list" class="text-muted text-sm">Загрузка...</div>
+      </div>
+      <div class="settings-section">
         <div class="section-label">Шаблоны</div>
-        <div class="text-muted text-sm" style="line-height:1.9">
+        <div class="text-muted text-sm" style="line-height:1.9;margin-bottom:12px">
           Phase 1: <span class="mono">Shablon.txt</span> — <span id="cfg-tpl1">—</span> шаблонов<br>
           Phase 2: <span class="mono">Shablon2.txt</span> — <span id="cfg-tpl2">—</span> шаблонов<br>
           Разделитель: <span class="mono">---</span>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Phase 1 — шаблоны первого сообщения</label>
+          <div id="tpl-list-1" class="text-muted text-sm">Загрузка...</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <input type="text" id="tpl-new-1" placeholder="Новый шаблон Phase 1..." style="flex:1">
+            <button class="btn btn-primary" onclick="addTemplate(1)">＋</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Phase 2 — шаблоны ответа</label>
+          <div id="tpl-list-2" class="text-muted text-sm">Загрузка...</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <input type="text" id="tpl-new-2" placeholder="Новый шаблон Phase 2..." style="flex:1">
+            <button class="btn btn-primary" onclick="addTemplate(2)">＋</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1031,22 +1205,128 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight')  lbNav(1);
 });
 
+// ── Links (Lumma + Shlepock) ──
+let _linksResults = [];
+let _linksHistory = [];
+try {
+  const _parsed = JSON.parse(localStorage.getItem('links_history') || '[]');
+  // Shape-guard: corrupted storage must not throw later or render garbage.
+  if (Array.isArray(_parsed)) {
+    _linksHistory = _parsed
+      .filter(h => h && typeof h.url === 'string')
+      .map(h => ({ ...h, url: h.url.slice(0, 2000), time: Number(h.time) || Date.now() }));
+  }
+} catch { _linksHistory = []; }
+function saveLinksHistory() {
+  try { localStorage.setItem('links_history', JSON.stringify(_linksHistory.slice(0, 20))); } catch { /* ignore */ }
+}
+async function loadLinksConfig() {
+  try {
+    const c = await api('/api/links/config');
+    document.getElementById('links-config').textContent =
+      `Lumma: ${c.lumma ? '✓ настроен' : '✗ нет env'} · Shlepock: ${c.shlepock ? '✓ настроен' : '✗ нет env'}`;
+  } catch { /* offline — промолчим */ }
+  renderLinksHistory();
+}
+async function generateLink() {
+  const inp = document.getElementById('links-url');
+  const url = inp.value.trim();
+  if (!url) return;
+  const btn = document.getElementById('links-btn');
+  const box = document.getElementById('links-results');
+  btn.disabled = true;
+  box.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-title">Создание ссылок...</div></div>';
+  try {
+    const r = await apiPost('/api/links/generate', { source_url: url });
+    _linksResults = r.results || [];
+    renderLinksResults(url);
+    const ok = _linksResults.filter(x => x.ok).length;
+    _linksHistory.unshift({ url, time: Date.now(), ok, total: _linksResults.length });
+    saveLinksHistory(); renderLinksHistory();
+  } catch (e) {
+    box.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-title">${esc(e.message)}</div></div>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+function renderLinksResults(url) {
+  const box = document.getElementById('links-results');
+  box.innerHTML = _linksResults.map((r, i) => r.ok ? `
+    <div style="display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;color:var(--t1);font-size:13px">✅ ${esc(r.label)}</div>
+        <div style="font-family:var(--mono);font-size:12.5px;color:var(--t2);word-break:break-all">${esc(r.link)}</div>
+      </div>
+      <button class="btn btn-secondary" onclick="copyLinkResult(${i},this)">📋 Копировать</button>
+    </div>` : `
+    <div style="padding:10px 0;border-bottom:1px solid var(--bd)">
+      <div style="font-weight:600;color:var(--t1);font-size:13px">❌ ${esc(r.label)}</div>
+      <div class="text-muted text-sm"><code>${esc(r.code)}</code> — ${esc(r.message)}</div>
+    </div>`).join('')
+    + `<div class="text-muted text-sm" style="margin-top:8px">Источник: ${esc(url)}</div>`;
+}
+async function copyLinkResult(i, btn) {
+  const text = (_linksResults[i] || {}).link || '';
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch { /* ignore */ }
+    ta.remove();
+  }
+  if (btn) { const old = btn.textContent; btn.textContent = '✓ Скопировано'; setTimeout(() => btn.textContent = old, 1500); }
+}
+function renderLinksHistory() {
+  const tb = document.getElementById('links-history-tbody');
+  if (!tb) return;
+  if (!_linksHistory.length) {
+    tb.innerHTML = '<tr><td><div class="empty-state"><div class="empty-title">Пока пусто</div></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = _linksHistory.map((h, i) => `
+    <tr>
+      <td style="font-family:var(--mono);font-size:12px;word-break:break-all">${esc(h.url)}</td>
+      <td style="white-space:nowrap">${Number(h.ok) || 0}/${Number(h.total) || 0} ✓</td>
+      <td style="white-space:nowrap" class="text-muted text-sm">${esc(new Date(h.time).toLocaleString('ru-RU'))}</td>
+      <td style="white-space:nowrap"><button class="btn btn-secondary" onclick="reuseLink(${i})">↺ Повторить</button></td>
+    </tr>`).join('');
+}
+function reuseLink(i) {
+  const h = _linksHistory[i];
+  if (!h) return;
+  document.getElementById('links-url').value = h.url;
+  generateLink();
+}
+function clearLinksHistory() {
+  _linksHistory = []; saveLinksHistory(); renderLinksHistory();
+}
+
 // ── State ──
 let logs = [];
 let hideTimer = null;
 let ws = null;
 
 // ── Navigation ──
+let _navTimer = null;
 function goPage(name) {
   const content = document.getElementById('main-content');
+  if (_navTimer) clearTimeout(_navTimer);  // drop superseded rapid navs
   content.style.opacity = '0';
-  setTimeout(() => {
+  _navTimer = setTimeout(() => {
+    _navTimer = null;
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.topnav a').forEach(a => a.classList.remove('active'));
     const pg   = document.getElementById('page-' + name);
     const link = document.querySelector(`.topnav a[data-page="${name}"]`);
     if (pg)   pg.classList.add('active');
-    if (link) link.classList.add('active');
+    if (link) {
+      link.classList.add('active');
+      const tp = document.getElementById('topbar-page');
+      if (tp) tp.textContent = link.textContent.trim();
+    }
+    document.getElementById('sidebar').classList.remove('open');
     document.getElementById('main-content').classList.toggle('chat-mode', name === 'chat');
     if (name === 'chat') hideDrawer();
     onPageEnter(name);
@@ -1060,6 +1340,7 @@ function onPageEnter(name) {
   if (name === 'dashboard') { loadStats(); renderDashActivity(); }
   if (name === 'parser')    { loadStats(); loadAccountCount(); }
   if (name === 'sender')    { loadStats(); loadQueue(); loadTemplates(); loadSenderStatus(); }
+  if (name === 'links')     { loadLinksConfig(); }
   if (name === 'chat')      { initChat(); }
   if (name === 'inbox')     { loadStats(); loadTemplates(); }
   if (name === 'accounts')  { loadAccountCards(); }
@@ -1068,19 +1349,100 @@ function onPageEnter(name) {
 }
 
 // ── API ──
-async function api(path, method = 'GET', body) {
+// API_TOKEN gate: if the server has API_TOKEN set, it answers 401.
+// The token is requested once (shared prompt for parallel calls),
+// stored in localStorage and sent as `Authorization: Bearer`.
+let _apiToken = localStorage.getItem('api_token') || '';
+let _tokenRequest = null;
+function ensureApiToken() {
+  if (!_tokenRequest) {
+    _tokenRequest = (async () => {
+      const t = prompt('Сервер требует API-токен. Введите значение API_TOKEN:');
+      _tokenRequest = null;
+      if (t && t.trim()) {
+        _apiToken = t.trim();
+        try { localStorage.setItem('api_token', _apiToken); } catch { /* ignore */ }
+        // Reconnect WS so it picks up the new token via ?token=.
+        try { if (ws && ws.readyState === WebSocket.OPEN) ws.close(); } catch { /* ignore */ }
+        return true;
+      }
+      return false;
+    })();
+  }
+  return _tokenRequest;
+}
+async function api(path, method = 'GET', body, _retried) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (_apiToken) opts.headers['Authorization'] = 'Bearer ' + _apiToken;
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(path, opts);
+  if (r.status === 401 && path.startsWith('/api/') && !_retried) {
+    if (await ensureApiToken()) return api(path, method, body, true);
+  }
+  if (!r.ok) {
+    let detail = '';
+    try { const j = await r.json(); detail = j.error || JSON.stringify(j); }
+    catch { try { detail = await r.text(); } catch { /* ignore */ } }
+    if (r.status === 401 && path.startsWith('/api/')) {
+      // Token missing/rejected (prompt dismissed or wrong value):
+      // drop the saved token so a poisoned localStorage value does not
+      // fail every future call — the next call will prompt again.
+      _apiToken = '';
+      try { localStorage.removeItem('api_token'); } catch { /* ignore */ }
+      throw new Error('HTTP 401: неверный API-токен. Обновите страницу и введите API_TOKEN заново');
+    }
+    throw new Error(`HTTP ${r.status}${detail ? ': ' + detail.slice(0, 200) : ''}`);
+  }
   return r.json();
 }
 function apiPost(path, body) { return api(path, 'POST', body); }
+async function apiForm(path, form, _retried) {
+  const opts = { method: 'POST', body: form, headers: {} };
+  if (_apiToken) opts.headers['Authorization'] = 'Bearer ' + _apiToken;
+  let r = await fetch(path, opts);
+  if (r.status === 401 && path.startsWith('/api/') && !_retried) {
+    if (await ensureApiToken()) {
+      opts.headers['Authorization'] = 'Bearer ' + _apiToken;
+      r = await fetch(path, opts);
+    }
+  }
+  if (!r.ok) {
+    let detail = '';
+    try { const j = await r.json(); detail = j.error || JSON.stringify(j); }
+    catch { try { detail = await r.text(); } catch { /* ignore */ } }
+    if (r.status === 401 && path.startsWith('/api/')) {
+      // Same self-healing as api(): drop a rejected token, next call re-prompts.
+      _apiToken = '';
+      try { localStorage.removeItem('api_token'); } catch { /* ignore */ }
+      throw new Error('HTTP 401: неверный API-токен. Обновите страницу и введите API_TOKEN заново');
+    }
+    throw new Error(`HTTP ${r.status}${detail ? ': ' + detail.slice(0, 200) : ''}`);
+  }
+  return r.json();
+}
 
 // ── WebSocket ──
+let _wsBackoff = 2000, _wsOpenedAt = 0;
 function connectWS() {
-  ws = new WebSocket(`ws://${location.host}/ws/logs`);
-  ws.onopen    = () => { setDot('on'); setLabel('Готов') };
-  ws.onclose   = () => { setDot(''); setLabel('Нет связи'); setTimeout(connectWS, 2000) };
+  const proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+  const tok = _apiToken ? `?token=${encodeURIComponent(_apiToken)}` : '';
+  ws = new WebSocket(`${proto}${location.host}/ws/logs${tok}`);
+  ws.onopen    = () => { _wsOpenedAt = Date.now(); _wsBackoff = 2000; setDot('on'); setLabel('Готов') };
+  ws.onclose   = () => {
+    setDot(''); setLabel('Нет связи');
+    // Fast-close loop usually means the token was rejected (4401):
+    // drop the poisoned token and re-prompt instead of hot-looping.
+    const fast = Date.now() - _wsOpenedAt < 3000;
+    const wait = _wsBackoff; _wsBackoff = Math.min(_wsBackoff * 2, 30000);
+    setTimeout(async () => {
+      if (fast && _apiToken) {
+        _apiToken = '';
+        try { localStorage.removeItem('api_token'); } catch { /* ignore */ }
+        await ensureApiToken();  // dismiss → loop continues, re-prompts later
+      }
+      connectWS();
+    }, wait);
+  };
   ws.onerror   = () => ws.close();
   ws.onmessage = e => {
     const msg = JSON.parse(e.data);
@@ -1154,7 +1516,19 @@ function clearLog() {
   hideDrawer();
 }
 function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/`/g,'&#96;');
+}
+function safeId(s) {
+  // Lossy char mapping can collide (e.g. "a.b" vs "a b") — suffix a hash.
+  const str = String(s);
+  const base = str.replace(/[^a-zA-Z0-9_-]/g, '_');
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return `${base}_${h.toString(36)}`;
+}
+function safeUrl(u) {
+  // Only http(s) URLs are linkable — blocks `javascript:` href XSS.
+  return (typeof u === 'string' && /^https?:\/\//i.test(u)) ? u : null;
 }
 
 // ── Drawer ──
@@ -1242,21 +1616,23 @@ async function loadQueue() {
       </div></td></tr>`;
       return;
     }
-    tbody.innerHTML = rows.map(r => `
+    tbody.innerHTML = rows.map(r => {
+      const link = safeUrl(r.url);
+      return `
       <tr class="tbl-row-wrap">
         <td>${esc(r.seller_name)}</td>
         <td style="position:relative">
-          ${r.url ? `<a href="${esc(r.url)}" target="_blank" style="color:var(--bl)">${esc(r.title || '—')}</a>` : esc(r.title || '—')}
+          ${link ? `<a href="${esc(link)}" target="_blank" style="color:var(--bl)">${esc(r.title || '—')}</a>` : esc(r.title || '—')}
           <div class="queue-tooltip">
             <div class="qt-title">${esc(r.title || '—')}</div>
             <div class="qt-row">💰 ${esc(r.price || 'цена не указана')}</div>
             <div class="qt-row">📂 ${esc(r.category || 'без категории')}</div>
-            ${r.url ? `<a class="qt-link" href="${esc(r.url)}" target="_blank">🔗 Открыть объявление ↗</a>` : ''}
+            ${link ? `<a class="qt-link" href="${esc(link)}" target="_blank">🔗 Открыть объявление ↗</a>` : ''}
           </div>
         </td>
         <td>${esc(r.price    || '—')}</td>
         <td>${esc(r.category || '—')}</td>
-      </tr>`).join('');
+      </tr>`; }).join('');
   } catch {
     tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">
       <div class="empty-icon">⚠️</div>
@@ -1274,21 +1650,54 @@ async function loadAccountCards() {
       grid.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">Аккаунты не найдены</div><div class="empty-sub">Положите файлы cookies в папку cookies/</div></div>';
       return;
     }
-    grid.innerHTML = r.accounts.map(a => `
-      <div class="acct-card" id="acct-${CSS.escape(a.name)}">
+    // per-account health (non-critical: badges fall back to token check).
+    // NOTE: /api/accounts/health returns the name->health map directly.
+    let health = {};
+    try {
+      const h = await api('/api/accounts/health');
+      if (h) health = h.results ? h.results : h;
+    } catch { /* ignore — badges below will show token state */ }
+    grid.innerHTML = r.accounts.map(a => {
+      const h = health[a.name];
+      const verdict = h ? h.verdict : null;
+      const statusClass = verdict === 'banned'  ? 'status-err'
+                        : verdict === 'expired' ? 'status-warn'
+                        : verdict === 'offline' ? 'status-unk'
+                        : a.has_token           ? 'status-ok'
+                                                : 'status-err';
+      const statusLabel = verdict === 'banned'  ? '🚫 Забанен'
+                        : verdict === 'expired' ? '⏰ Истёк'
+                        : verdict === 'offline' ? '📴 Нет сети'
+                        : a.has_token           ? 'Активен'
+                                                : 'Нет токена';
+      return `
+      <div class="acct-card" id="acct-${safeId(a.name)}">
         <div class="acct-top">
-          <div class="acct-avatar">👤</div>
+          <div class="acct-avatar">${verdict === 'banned' ? '🚫' : '👤'}</div>
           <div style="flex:1;min-width:0">
             <div class="acct-name">${esc(a.name)}</div>
             <div style="margin-top:5px">
-              <span class="status-badge ${a.has_token ? 'status-unk' : 'status-err'}" id="badge-${CSS.escape(a.name)}">
+              <span class="status-badge ${statusClass}" id="badge-${safeId(a.name)}">
                 <span class="acct-dot"></span>
-                ${a.has_token ? 'Токен найден' : 'Нет токена'}
+                ${statusLabel}
               </span>
             </div>
           </div>
         </div>
-      </div>`).join('');
+        ${(() => {
+          if (!h) return '';
+          const bits = [];
+          if (h.email) bits.push(esc(h.email));
+          if (h.verdict === 'banned' && h.ban_signals && h.ban_signals.length)
+            bits.push('сигналы: ' + esc(h.ban_signals.slice(0, 3).join(', ')));
+          if (h.verdict === 'expired' && h.consecutive_401s)
+            bits.push('401 × ' + h.consecutive_401s);
+          return bits.length ? `<div class="text-muted text-xs" style="margin-top:4px">${bits.join(' · ')}</div>` : '';
+        })()}
+        <button class="btn btn-danger" style="margin-top:8px;padding:4px 10px;font-size:12px"
+          data-name="${esc(a.name)}" onclick="deleteAccount(this)">✕ Удалить</button>
+      </div>`;
+    }).join('');
   } catch {
     grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Ошибка загрузки</div></div>';
   }
@@ -1302,18 +1711,133 @@ async function checkAccounts() {
     el.innerHTML = '<span class="acct-dot"></span> Проверяется...';
   });
   try {
-    const results = await apiPost('/api/accounts/check');
+    const resp = await apiPost('/api/accounts/check');
+    const results = (resp && resp.results) ? resp.results : resp;
+    const health = (resp && resp.health) ? resp.health : {};
     for (const [name, status] of Object.entries(results)) {
-      const el = document.getElementById('badge-' + CSS.escape(name));
+      const el = document.getElementById('badge-' + safeId(name));
       if (!el) continue;
-      const map = { ok: ['status-ok','Активен'], expired: ['status-err','Куки истекли'], no_token: ['status-err','Нет токена'] };
-      const [cls, label] = map[status] || ['status-unk', 'Ошибка'];
+      const h = health[name];
+      const verdict = h ? h.verdict : null;
+      const map = { ok: ['status-ok','Активен'], expired: ['status-warn','Куки истекли'], no_token: ['status-err','Нет токена'] };
+      let [cls, label] = map[status] || ['status-unk', 'Ошибка'];
+      if (verdict === 'banned') { cls = 'status-err'; label = '🚫 Забанен'; }
       el.className = `status-badge ${cls}`;
       el.innerHTML = `<span class="acct-dot"></span> ${label}`;
     }
     toast('Проверка завершена', 'ok');
   } catch { toast('Ошибка при проверке аккаунтов', 'err') }
   finally { if (btn) { btn.disabled = false; btn.textContent = '▶ Проверить все' } }
+}
+
+async function uploadCookies() {
+  const input = document.getElementById('cookie-files');
+  const box = document.getElementById('cookie-upload-result');
+  if (!input.files.length) { toast('Выберите файлы', 'err'); return; }
+  if (input.files.length > 20) { toast('Максимум 20 файлов за раз', 'err'); return; }
+  const btn = document.getElementById('btn-upload-cookies');
+  if (btn) btn.disabled = true;
+  box.textContent = 'Загрузка...';
+  const fd = new FormData();
+  for (const f of input.files) fd.append('files', f);
+  try {
+    const r = await apiForm('/api/cookies/upload', fd);
+    const ok = r.results.filter(x => x.ok), bad = r.results.filter(x => !x.ok);
+    box.innerHTML = r.results.map(x => x.ok
+      ? `✅ ${esc(x.file)} → <b>${esc(x.name)}</b>${x.has_token ? '' : ' (нет токена!)'} <span class="text-muted">— ${esc(x.note || '')}</span>`
+      : `❌ ${esc(x.file)}: ${esc(x.error || 'ошибка')}`).join('<br>');
+    toast(`Аккаунты: добавлено ${ok.length}, ошибок ${bad.length}`, ok.length ? 'ok' : 'err');
+    input.value = '';
+    loadAccountCards(); loadAccountCount();
+  } catch (e) { toast('Ошибка загрузки: ' + e.message, 'err'); box.textContent = ''; }
+  finally { if (btn) btn.disabled = false; }
+}
+
+async function deleteAccount(el) {
+  const name = el.dataset.name;
+  if (!confirm(`Удалить аккаунт «${name}»? Файл cookies/${name}.json будет удалён.`)) return;
+  try {
+    await api(`/api/cookies/${encodeURIComponent(name)}`, 'DELETE');
+    toast(`Аккаунт ${name} удалён`, 'ok');
+    loadAccountCards(); loadAccountCount();
+  } catch (e) { toast('Ошибка удаления: ' + e.message, 'err'); }
+}
+
+async function bulkLogin() {
+  const ta = document.getElementById('bulk-creds');
+  const box = document.getElementById('bulk-login-result');
+  const lines = ta.value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (!lines.length) { toast('Вставьте строки email:пароль', 'err'); return; }
+  if (lines.length > 50) { toast('Максимум 50 строк за раз', 'err'); return; }
+  const btn = document.getElementById('btn-bulk-login');
+  if (btn) btn.disabled = true;
+  try {
+    const r = await apiPost('/api/credentials/bulk', {lines});
+    const bad = (r.invalid || []).map(esc).join('<br>');
+    box.innerHTML = `Очередь: ${Number(r.queued) || 0} — входы идут в фоне, следите за логами.${bad ? '<br>❌<br>' + bad : ''}`;
+    toast(`Массовый вход запущен: ${Number(r.queued) || 0}`, 'ok');
+    ta.value = '';  // don't leave passwords in the DOM
+    loadAccountCards(); loadAccountCount();
+  } catch (e) { toast('Ошибка запуска: ' + e.message, 'err'); }
+  finally { if (btn) btn.disabled = false; }
+}
+
+// ── Templates manager ──
+async function loadFullTemplates() {
+  for (const phase of [1, 2]) {
+    const box = document.getElementById(`tpl-list-${phase}`);
+    if (box) box.textContent = 'Загрузка...';
+  }
+  try {
+    const t = await api('/api/templates/full');
+    renderTplList(1, t.phase1 || []);
+    renderTplList(2, t.phase2 || []);
+  } catch {
+    for (const phase of [1, 2]) {
+      const box = document.getElementById(`tpl-list-${phase}`);
+      if (box) box.textContent = 'Ошибка загрузки';
+    }
+  }
+}
+function renderTplList(phase, items) {
+  const box = document.getElementById(`tpl-list-${phase}`);
+  if (!box) return;
+  if (!items.length) { box.innerHTML = '<div class="text-muted">Пока пусто — добавьте первый шаблон ниже</div>'; return; }
+  box.innerHTML = items.map((t, i) => `
+    <div style="display:flex;gap:8px;margin-bottom:6px">
+      <input type="text" id="tpl-${phase}-${i}" value="${esc(t)}" style="flex:1;min-width:0">
+      <button class="btn btn-primary" style="padding:4px 10px" onclick="saveTemplate(${phase},${i})">✓</button>
+      <button class="btn btn-danger" style="padding:4px 10px" onclick="deleteTemplate(${phase},${i})">✕</button>
+    </div>`).join('');
+}
+async function addTemplate(phase) {
+  const input = document.getElementById(`tpl-new-${phase}`);
+  const text = (input.value || '').trim();
+  if (!text) { toast('Введите текст шаблона', 'err'); return; }
+  try {
+    await apiPost('/api/templates', { phase, text });
+    input.value = '';
+    toast('Шаблон добавлен', 'ok');
+    loadFullTemplates(); loadTemplates();
+  } catch (e) { toast('Ошибка: ' + e.message, 'err'); }
+}
+async function saveTemplate(phase, i) {
+  const el = document.getElementById(`tpl-${phase}-${i}`);
+  const text = (el.value || '').trim();
+  if (!text) { toast('Пустой текст — удалите шаблон вместо сохранения', 'err'); return; }
+  try {
+    await api(`/api/templates/${phase}/${i}`, 'PUT', { text });
+    toast('Шаблон сохранён', 'ok');
+    loadTemplates();
+  } catch (e) { toast('Ошибка: ' + e.message, 'err'); }
+}
+async function deleteTemplate(phase, i) {
+  if (!confirm('Удалить этот шаблон?')) return;
+  try {
+    await api(`/api/templates/${phase}/${i}`, 'DELETE');
+    toast('Шаблон удалён', 'ok');
+    loadFullTemplates(); loadTemplates();
+  } catch (e) { toast('Ошибка: ' + e.message, 'err'); }
 }
 
 // ── Settings ──
@@ -1330,6 +1854,8 @@ async function loadSettings() {
     setVal('sched-per-run',      s.scheduler_per_run  ?? 2);
     setVal('parser-hours',       s.hours              ?? 72);
     loadTemplates();
+    loadFullTemplates();
+    loadCredStatus();
   } catch {}
 }
 async function saveSettings() {
@@ -1345,6 +1871,43 @@ function setVal(id, v)    { const el = document.getElementById(id); if (el) el.v
 function intVal(id)       { return parseInt(document.getElementById(id)?.value || '0') }
 function floatVal(id)     { return parseFloat(document.getElementById(id)?.value || '0') }
 
+// ── Credentials (автологин login:pass) ──
+async function loadCredStatus() {
+  const box = document.getElementById('cred-list');
+  if (box) box.textContent = 'Загрузка...';
+  try {
+    const [accts, cred] = await Promise.all([api('/api/accounts'), api('/api/credentials')]);
+    const names = (accts.accounts || []).map(a => a.name);
+    const has = new Set(cred.configured || []);
+    if (!names.length) { if (box) box.innerHTML = '<div class="text-muted">Нет аккаунтов</div>'; return; }
+    box.innerHTML = names.map(n => `
+      <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center;flex-wrap:wrap">
+        <b style="min-width:120px">${esc(n)}${has.has(n) ? ' <span class="status-badge status-ok">● set</span>' : ''}</b>
+        <input type="email" id="cred-email-${safeId(n)}" placeholder="email" autocomplete="off" style="flex:1;min-width:140px">
+        <input type="password" id="cred-pass-${safeId(n)}" placeholder="пароль" autocomplete="new-password" style="flex:1;min-width:140px">
+        <button class="btn btn-primary" style="padding:4px 10px" data-name="${esc(n)}" onclick="saveCred(this)">✓</button>
+        ${has.has(n) ? `<button class="btn" style="padding:4px 10px" data-name="${esc(n)}" onclick="deleteCred(this)">✕</button>` : ''}
+      </div>`).join('');
+  } catch { if (box) box.textContent = 'Ошибка загрузки'; }
+}
+async function saveCred(el) {
+  const name = el.dataset.name;
+  const sid = safeId(name);
+  const email = document.getElementById(`cred-email-${sid}`)?.value || '';
+  const password = document.getElementById(`cred-pass-${sid}`)?.value || '';
+  try {
+    await apiPost('/api/credentials', { account: name, email, password });
+    toast(`Автологин для ${name} сохранён`, 'ok');
+    loadCredStatus();
+  } catch (e) { toast('Ошибка сохранения: ' + e.message, 'err'); }
+}
+async function deleteCred(el) {
+  const name = el.dataset.name;
+  if (!confirm(`Удалить сохранённый логин для «${name}»?`)) return;
+  try { await api(`/api/credentials/${encodeURIComponent(name)}`, 'DELETE'); toast('Удалено', 'ok'); loadCredStatus(); }
+  catch (e) { toast('Ошибка удаления: ' + e.message, 'err'); }
+}
+
 // ══════════════════════════════════════════
 // ── CHAT ──
 // ══════════════════════════════════════════
@@ -1355,10 +1918,16 @@ let _chatMyId          = null;
 let _allConvs          = [];
 let _photoFiles        = [];
 let _autoTranslate     = localStorage.getItem('autotl') === '1';
+let _ruDeSend          = localStorage.getItem('ru_de_send') !== '0';  // RU→DE before send, default ON
+let _ruDeConfirmed     = false;  // textarea currently holds approved German preview
+let _chatPage          = 1;    // pagination of conversation list
+const _CHAT_PER_PAGE   = 30;
+let _chatHasMore       = false;
 
 async function initChat() {
   renderQuickReplies();
   syncAutoTranslateBtn();
+  syncRuDeBtn(); syncSendBtn();
   const convList = document.getElementById('conv-list');
   if (!convList._chatWired) {
     convList._chatWired = true;
@@ -1391,19 +1960,65 @@ async function onChatAccountChange() {
 
 async function loadConversations() {
   document.getElementById('conv-list').innerHTML = skeletonConvList();
+  _chatPage = 1;
   try {
     let r;
     if (_chatAccount === '__all__') {
-      r = await api('/api/chat/conversations/all');
+      r = await api(`/api/chat/conversations/all?page=1&per_page=${_CHAT_PER_PAGE}`);
     } else {
-      r = await api(`/api/chat/conversations?account=${encodeURIComponent(_chatAccount)}`);
+      r = await api(`/api/chat/conversations?account=${encodeURIComponent(_chatAccount)}&page=1&per_page=${_CHAT_PER_PAGE}`);
     }
     _allConvs = r.conversations || [];
+    _chatHasMore = _allConvs.length >= _CHAT_PER_PAGE;
     renderConvList(_allConvs);
+    syncMoreBtn();
     updateNavBadge();
   } catch {
+    _chatHasMore = false;
+    syncMoreBtn();
     document.getElementById('conv-list').innerHTML =
       '<div class="chat-empty" style="color:var(--rd)">Ошибка загрузки</div>';
+  }
+}
+
+function syncMoreBtn() {
+  const btn = document.getElementById('conv-more-btn');
+  if (!btn) return;
+  const searching = (document.getElementById('chat-search')?.value || '').trim() !== '';
+  btn.style.display = (_chatHasMore && !searching) ? '' : 'none';
+  btn.disabled = false;
+  btn.textContent = 'Показать ещё ↓';
+}
+
+async function loadMoreConversations() {
+  const btn = document.getElementById('conv-more-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Загрузка...'; }
+  // Guard: an account switch mid-load must not mix two accounts' pages.
+  const _acct = _chatAccount;
+  const next = _chatPage + 1;
+  try {
+    let r;
+    if (_acct === '__all__') {
+      r = await api(`/api/chat/conversations/all?page=${next}&per_page=${_CHAT_PER_PAGE}`);
+    } else {
+      r = await api(`/api/chat/conversations?account=${encodeURIComponent(_acct)}&page=${next}&per_page=${_CHAT_PER_PAGE}`);
+    }
+    if (_chatAccount !== _acct) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Показать ещё ↓'; }
+      return;
+    }
+    const more = r.conversations || [];
+    _chatPage = next;
+    _allConvs = _allConvs.concat(more);
+    _chatHasMore = more.length >= _CHAT_PER_PAGE;
+    const list = document.getElementById('conv-list');
+    const st = list ? list.scrollTop : 0;
+    renderConvList(_allConvs);
+    if (list) list.scrollTop = st;
+    syncMoreBtn();
+    updateNavBadge();
+  } catch {
+    if (btn) { btn.disabled = false; btn.textContent = 'Показать ещё ↓'; toast('Ошибка загрузки', 'err'); }
   }
 }
 
@@ -1445,7 +2060,7 @@ let _searchTimer = null;
 function onSearchInput() {
   clearTimeout(_searchTimer);
   const q = document.getElementById('chat-search').value.trim();
-  if (!q) { renderConvList(_allConvs); return; }
+  if (!q) { renderConvList(_allConvs); syncMoreBtn(); return; }
   _searchTimer = setTimeout(() => runSearch(q), 320);
 }
 
@@ -1490,6 +2105,7 @@ async function runSearch(q) {
       }
     }
     renderConvList(matched, true);
+    syncMoreBtn();
   } finally {
     if (spinner) spinner.style.display = 'none';
   }
@@ -1547,7 +2163,7 @@ function convItemHtml(c, showMatch) {
   // Show account badge only in unified "all" mode
   const acctBadge = acct && _chatAccount === '__all__'
     ? `<span class="conv-acct-badge">${esc(acct)}</span>` : '';
-  return `<div class="conv-item${active}" data-pid="${pid}" data-name="${esc(name)}" data-avatar="${esc(avatar)}" data-account="${esc(acct)}">
+  return `<div class="conv-item${active}" data-pid="${esc(pid)}" data-name="${esc(name)}" data-avatar="${esc(avatar)}" data-account="${esc(acct)}">
     ${avHtml}
     <div class="conv-info">
       <div class="conv-name">${esc(name)}${dimNote}${acctBadge}</div>
@@ -1565,9 +2181,14 @@ function convItemHtml(c, showMatch) {
 async function openConv(partnerId, name, avatarUrl, accountOverride) {
   _chatPartnerId     = partnerId;
   _activeChatAccount = accountOverride || _chatAccount;
+  _ruDeConfirmed = false; syncSendBtn();
   document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
-  document.querySelector(`.conv-item[data-pid="${partnerId}"][data-account="${_activeChatAccount}"],` +
-    `.conv-item[data-pid="${partnerId}"]:not([data-account])`)?.classList.add('active');
+  // NB: compare via dataset, never interpolate data into a selector string.
+  document.querySelectorAll('.conv-item').forEach(el => {
+    if (String(el.dataset.pid) === String(partnerId) &&
+        (el.dataset.account === _activeChatAccount || !el.dataset.account))
+      el.classList.add('active');
+  });
   showThread(name, avatarUrl, partnerId);
   loadListingInfo(partnerId);
   await loadMessages(partnerId);
@@ -1578,7 +2199,7 @@ async function loadListingInfo(partnerId) {
   sub.innerHTML = `<span style="color:var(--t3)">Загрузка...</span>`;
   try {
     const r = await api(`/api/sellers/${partnerId}/listing`);
-    if (r.url) {
+    if (r.url && /^https?:\/\//i.test(r.url)) {
       const title = r.title ? esc(r.title.slice(0, 40)) + (r.title.length > 40 ? '…' : '') : 'Объявление';
       sub.innerHTML = `
         <a class="chat-listing-link" href="${esc(r.url)}" target="_blank">
@@ -1621,7 +2242,9 @@ async function loadMessages(partnerId) {
     if (conv && users[partnerId]) {
       conv._linkedUser = users[partnerId];
       renderConvList(_allConvs);
-      document.querySelector(`.conv-item[data-pid="${partnerId}"]`)?.classList.add('active');
+      document.querySelectorAll('.conv-item').forEach(el => {
+        if (String(el.dataset.pid) === String(partnerId)) el.classList.add('active');
+      });
       document.getElementById('chat-header-name').textContent = convName(conv);
     }
 
@@ -1735,6 +2358,31 @@ function syncAutoTranslateBtn() {
   btn.title = _autoTranslate ? 'Авто-перевод ВКЛ (нажать чтобы выкл)' : 'Авто-перевод ВЫКЛ';
 }
 
+// ── RU→DE before send: 1st press translates Russian into the textarea
+// for review, 2nd press sends the German text. State resets on edit,
+// chat switch, toggle or successful send.
+function toggleRuDeSend() {
+  _ruDeSend = !_ruDeSend;
+  try { localStorage.setItem('ru_de_send', _ruDeSend ? '1' : '0'); } catch { /* ignore */ }
+  _ruDeConfirmed = false;
+  syncRuDeBtn(); syncSendBtn();
+  toast(_ruDeSend ? 'Перевод RU→DE включён' : 'Перевод RU→DE выключен', 'ok');
+}
+function syncRuDeBtn() {
+  const btn = document.getElementById('rude-btn');
+  if (!btn) return;
+  btn.classList.toggle('on', _ruDeSend);
+  btn.title = _ruDeSend ? 'Перевод RU→DE ВКЛ (нажать чтобы выкл)' : 'Перевод RU→DE ВЫКЛ';
+}
+function syncSendBtn() {
+  const btn = document.getElementById('btn-chat-send');
+  if (!btn || btn.disabled) return;
+  btn.textContent = _ruDeConfirmed ? '✓' : '➤';
+  btn.classList.toggle('confirm', _ruDeConfirmed);
+  if (_ruDeConfirmed) btn.title = 'Немецкий перевод готов — нажать для отправки';
+  else btn.removeAttribute('title');
+}
+
 async function translateMsg(btn) {
   const text   = btn.dataset.text;
   const bubble = btn.closest('.msg-row').querySelector('.msg-bubble');
@@ -1743,8 +2391,8 @@ async function translateMsg(btn) {
   if (existing) { existing.remove(); btn.textContent = '🌐 RU'; return; }
   btn.disabled = true; btn.textContent = '...';
   try {
-    const r = await fetch(`/api/translate?text=${encodeURIComponent(text)}`);
-    const d = await r.json();
+    if (text.length > 500) toast('Текст обрезан до 500 символов для перевода', 'err');
+    const d = await api('/api/translate', 'POST', { text: text.slice(0, 500) });
     if (d.translated) {
       const div = document.createElement('div');
       div.className   = 'msg-translation';
@@ -1758,16 +2406,27 @@ async function translateMsg(btn) {
 
 // Photos
 function onPhotosSelected(input) {
-  _photoFiles = [..._photoFiles, ...input.files];
+  // Client-side mirror of the server caps (5 files / image type / 10MB):
+  // rejects early with a toast instead of failing at upload time.
+  const MAX_PHOTOS = 5, MAX_BYTES = 10 * 1024 * 1024;
+  for (const f of input.files) {
+    if (_photoFiles.length >= MAX_PHOTOS) { toast('Максимум 5 фото', 'err'); break; }
+    if (!f.type || !f.type.startsWith('image/')) { toast(`Не картинка: ${f.name}`, 'err'); continue; }
+    if (f.size > MAX_BYTES) { toast(`Слишком большое (>10MB): ${f.name}`, 'err'); continue; }
+    _photoFiles.push(f);
+  }
   renderPhotoPreviews();
   input.value = '';
 }
 function renderPhotoPreviews() {
   const box = document.getElementById('compose-photos');
-  if (!_photoFiles.length) { box.style.display = 'none'; return; }
+  if (window._photoPreviewUrls) { for (const u of window._photoPreviewUrls) { try { URL.revokeObjectURL(u); } catch { /* ignore */ } } }
+  window._photoPreviewUrls = [];
+  if (!_photoFiles.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
   box.style.display = 'flex';
   box.innerHTML = _photoFiles.map((f, i) => {
     const url = URL.createObjectURL(f);
+    window._photoPreviewUrls.push(url);
     return `<div class="compose-photo-preview"><img src="${url}" alt=""><button class="rm-photo" onclick="removePhoto(${i})">✕</button></div>`;
   }).join('');
 }
@@ -1780,6 +2439,29 @@ async function sendChatMessage() {
   const text = ta.value.trim();
   if (!text && !_photoFiles.length) return;
   const btn  = document.getElementById('btn-chat-send');
+  // RU→DE preview step: translate Russian, show German for review, send on 2nd press.
+  if (_ruDeSend && text && !_ruDeConfirmed) {
+    btn.disabled = true; btn.textContent = '…';
+    // Guard: shared textarea — if the user switched chat mid-translate,
+    // never overwrite the other conversation's draft.
+    const _pid = _chatPartnerId, _acct = _activeChatAccount || _chatAccount;
+    try {
+      if (text.length > 500) toast('Текст обрезан до 500 символов для перевода', 'err');
+      const d = await api('/api/translate', 'POST', { text: text.slice(0, 500), source: 'ru', target: 'de' });
+      if ((_activeChatAccount || _chatAccount) !== _acct || _chatPartnerId !== _pid) return;
+      if (d.translated) {
+        ta.value = d.translated;
+        ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 180) + 'px';
+        _ruDeConfirmed = true; syncSendBtn();
+        toast('Проверь перевод и нажми ещё раз для отправки', 'ok');
+      } else { toast('Перевод не удался — не отправлено', 'err') }
+    } catch (e) { toast('Перевод не удался: ' + e.message + ' — не отправлено', 'err') }
+    finally {
+      btn.disabled = false;
+      if (!_ruDeConfirmed) { btn.textContent = '➤'; btn.classList.remove('confirm'); }
+    }
+    return;
+  }
   btn.disabled = true; btn.textContent = '…';
   const hasPhotos = _photoFiles.length > 0;
   try {
@@ -1790,18 +2472,19 @@ async function sendChatMessage() {
       fd.append('partner_id', String(_chatPartnerId));
       fd.append('text', text);
       for (const f of _photoFiles) fd.append('photos', f);
-      r = await (await fetch('/api/chat/send-photo', { method: 'POST', body: fd })).json();
+      r = await apiForm('/api/chat/send-photo', fd);
     } else {
       r = await apiPost('/api/chat/send', { account: acct, partner_id: _chatPartnerId, text });
     }
     if (r.ok) {
       ta.value = ''; ta.style.height = 'auto';
       _photoFiles = []; renderPhotoPreviews();
+      _ruDeConfirmed = false;
       toast('Отправлено', 'ok');
       setTimeout(() => loadMessages(_chatPartnerId), hasPhotos ? 3500 : 1500);
     } else { toast('Ошибка отправки', 'err') }
   } catch { toast('Ошибка отправки', 'err') }
-  finally { btn.disabled = false; btn.textContent = '➤' }
+  finally { btn.disabled = false; btn.textContent = '➤'; btn.classList.remove('confirm'); }
 }
 
 function fmtTime(iso) {
@@ -1944,8 +2627,47 @@ function handleNewMessage(msg) {
     setTimeout(() => n.close(), 8000);
   }
   toast(`💬 [${account}] новое сообщение`, 'ok');
-  if (_chatPartnerId == partnerId && _chatAccount === account)
+  refreshConvListQuiet();
+  // NB: in '__all__' mode _chatAccount is '__all__', the owning account
+  // of the open thread is _activeChatAccount — compare against that.
+  const openAcct = _activeChatAccount || _chatAccount;
+  if (_chatPartnerId == partnerId && account === openAcct)
     setTimeout(() => loadMessages(partnerId), 800);
+}
+
+// Quiet background refresh of the conversation list on new_message:
+// no skeleton flicker, scroll + active highlight preserved. Skipped
+// while searching (different dataset) or when chat page is not visible.
+let _refreshing = false;
+async function refreshConvListQuiet() {
+  if (_refreshing) return;  // overlapping new_message events: last writer wins otherwise
+  _refreshing = true;
+  const _acct = _chatAccount;  // account switch mid-refresh must not mix datasets
+  const list = document.getElementById('conv-list');
+  if (!list || !document.querySelector('#page-chat.active')) { _refreshing = false; return; }
+  if ((document.getElementById('chat-search')?.value || '').trim() !== '') { _refreshing = false; return; }
+  try {
+    let convs = [], hasMore = false;
+    for (let p = 1; p <= Math.max(1, _chatPage); p++) {
+      if (_chatAccount !== _acct) return;
+      const r = await api(_acct === '__all__'
+        ? `/api/chat/conversations/all?page=${p}&per_page=${_CHAT_PER_PAGE}`
+        : `/api/chat/conversations?account=${encodeURIComponent(_acct)}&page=${p}&per_page=${_CHAT_PER_PAGE}`);
+      const page = r.conversations || [];
+      convs = convs.concat(page);
+      hasMore = page.length >= _CHAT_PER_PAGE;
+      if (!hasMore) break;
+    }
+    if (_chatAccount !== _acct) return;
+    const st = list.scrollTop;
+    _allConvs = convs;
+    _chatHasMore = hasMore;
+    renderConvList(_allConvs);
+    list.scrollTop = st;
+    syncMoreBtn();
+    updateNavBadge();
+  } catch { /* silent: next poll will retry */ }
+  finally { _refreshing = false; }
 }
 
 // ── Refresh ──

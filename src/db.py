@@ -32,6 +32,17 @@ async def init_db(db_path: str = "data/nebena.db") -> aiosqlite.Connection:
         await conn.execute("ALTER TABLE listings ADD COLUMN price TEXT DEFAULT ''")
     if "category" not in cols:
         await conn.execute("ALTER TABLE listings ADD COLUMN category TEXT DEFAULT ''")
+    # Migrate old sellers table that may lack reply-tracking columns
+    async with conn.execute("PRAGMA table_info(sellers)") as cur:
+        scols = {row[1] for row in await cur.fetchall()}
+    if "replied" not in scols:
+        await conn.execute("ALTER TABLE sellers ADD COLUMN replied INTEGER DEFAULT 0")
+    if "phase2_sent" not in scols:
+        await conn.execute("ALTER TABLE sellers ADD COLUMN phase2_sent INTEGER DEFAULT 0")
+    if "message_url" not in scols:
+        await conn.execute("ALTER TABLE sellers ADD COLUMN message_url TEXT DEFAULT ''")
+    if "first_seen_at" not in scols:
+        await conn.execute("ALTER TABLE sellers ADD COLUMN first_seen_at TEXT DEFAULT ''")
     await conn.commit()
     return conn
 
@@ -45,15 +56,24 @@ async def upsert_listing(conn: aiosqlite.Connection, listing: dict) -> None:
         """,
         (listing["seller_id"], listing["seller_name"], now, listing.get("message_url", "")),
     )
+    # Refresh mutable seller fields on re-parse (renames / re-links propagate).
+    # message_url only when truthy — a re-parse without it must not wipe a
+    # previously good URL (phase-2 would misroute via the guessed fallback).
+    await conn.execute(
+        "UPDATE sellers SET seller_name = ?, message_url = COALESCE(NULLIF(?, ''), message_url) WHERE seller_id = ?",
+        (listing["seller_name"], listing.get("message_url", ""), listing["seller_id"]),
+    )
     await conn.execute(
         """
         INSERT INTO listings
             (listing_id, seller_id, title, price, category, url, published_at, parsed_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(listing_id) DO UPDATE SET
-            price    = excluded.price,
-            category = excluded.category,
-            url      = excluded.url
+            title     = excluded.title,
+            price     = excluded.price,
+            category  = excluded.category,
+            url       = excluded.url,
+            parsed_at = excluded.parsed_at
         """,
         (
             listing["listing_id"],

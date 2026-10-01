@@ -13,3 +13,7 @@ dump_*.py
 analyze_*.py
 sniff_*.py
 save_cookies.py
+cookies/
+.env
+logins.json
+data/*.db
